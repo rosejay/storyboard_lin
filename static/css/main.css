@@ -115,9 +115,9 @@ html{
 
 img.selectedPic{
 	border: 4px solid #fff;
-	-moz-box-shadow: 0 0 5px #000;
-	-webkit-box-shadow: 0 0 5px #000;
-	box-shadow: 0 0 5px #000;
+	-moz-box-shadow: 0 0 5px #aaa;
+	-webkit-box-shadow: 0 0 5px #aaa;
+	box-shadow: 0 0 5px #aaa;
 }
 
 .scaleControl{
@@ -127,14 +127,14 @@ img.selectedPic{
 	height: 60px;
 	position: absolute;
 	cursor: pointer;
-
+	display: none;
 }
 .deletePic{
 	z-index: 1000;
 	position: absolute;
 	width: 40px;
 	height: 40px;
-
+	display: none;
 	transition:width 0.5s;
 	-moz-transition:width 0.5s; /* Firefox 4 */
 	-webkit-transition:width 0.5s; /* Safari and Chrome */
@@ -144,7 +144,7 @@ img.selectedPic{
 	color: #fff;
 }
 .deletePic:hover{
-	width:200px;
+	width:185px;
 }
 
 .deletePic .deleteBtn{
@@ -173,6 +173,7 @@ img.selectedPic{
 }
 .deletePic .text a{
 	cursor: pointer;
+	color: #f0595f；
 }
 .deletePic .text a:hover{
 	color: #f0595f；
@@ -226,6 +227,8 @@ img.selectedPic{
 }
 
 .slides img{
+	width: 100%;
+	height: 100%;
 }
 
 .text-editor{

@@ -184,10 +184,19 @@ $(document).ready(function(){
 					img.id="img"+imagenum;
 					img.src=evt.target.result;
 					
-					document.getElementById('dropzone').appendChild(img);
+					
+					$('#dropzone').append("<div id='imgBox"+imagenum+"' style='z-index:0;'></div>");
+					// make image dragable
+					$('#imgBox'+imagenum).addClass("ui-widget-content").draggable();
+					
+
+					document.getElementById('imgBox'+imagenum).appendChild(img);
+					$('#imgBox'+imagenum).append("<div class='scaleControl' style='right:-7px;bottom:0'></div><div class='deletePic' style='right:3px;top:10px'><div class='deleteBtn'></div><div class='text'><span>Really?</span><a click=''>Yes</a><span>/</span><a click=''>No</a></div></div>");
+				        
 					topDistance += curWidth*height/width;
 
 					img.onload = function(){
+						$('#imgBox'+imagenum).css("width",img.width).css("height",img.height);
 						if(img.width>img.height){
 							;
 							//document.getElementById('img'+imagenum).css("width","100%");
@@ -196,64 +205,52 @@ $(document).ready(function(){
 							;
 							//document.getElementById('img'+imagenum).css("height","100%");
 					}
-					// make image dragable
-					$('#img'+imagenum).addClass("ui-widget-content").draggable();
-
+					
 					// click image remove scale btn
-					$('#img'+imagenum).mousedown(function(e){
-						$('.scaleControl').remove();
+					$('#imgBox'+imagenum).mousedown(function(e){
 					});
+
+					$('#imgBox'+imagenum).hover(
+						function(e){
+							$('.scaleControl').fadeIn(150);
+							$('.deletePic').fadeIn(150);
+							$(this).children('img').addClass("selectedPic");
+						},
+						function(e){
+							$('.scaleControl').fadeOut(150);
+							$('.deletePic').fadeOut(150);
+							$(this).children('img').removeClass("selectedPic");
+						}
+					);
+
 					// click image add scale btn
-					$('#img'+imagenum).click(function(e){
-						var img = $(this);
-				        var x = parseInt($(this).css("left"));
-				        var y = parseInt($(this).css("top"));
-				        if (!x) 
-				        	x = 0;
-				        if (!y) 
-				        	y = 0;
+					$('#imgBox'+imagenum).click(function(e){
+						var img = $(this).children('img');
+						var x = $(this).attr("left");
+						var y = $(this).attr("top");
 
-				        var w = $(this).width();
-				        var h = $(this).height();
-				        console.log(x,y,w,h);
-				        var div = 50;
-
-				        var xA = x+w-50;
-				        var yA = y+h-50;
-				        var xA2;
-
-				        if(isLeftShow)
-				        	xA2 = width - 250 - w - x +2;
-				        else
-				        	xA2 = width - w - x +2;
-
-				        var yA2 = y+10;
-
-				        $(this).addClass("selectedPic");
-				        $('#img'+imagenum).append("<div class='scaleControl' style='right:0;bottom:0'></div><div class='deletePic' style='right:10px;top:10px'><div class='deleteBtn'></div><div class='text'><span>Really?</span><a click=''>Yes</a><span>/</span><a click=''>No</a></div></div>");
-				        
-		
 				        var isScale = false;
 				        $('.scaleControl').mousedown(function(e){
+				        	e.stopPropagation();
+							e.preventDefault();
 				        	if (!isScale) {
-				        		setPosition(e, $(this));
+				        		setPosition(e);
 					        	isScale = true;
+					        	alert("d");
 				        	}
 				        });
 				        $('.scaleControl').mousemove(function(e){
 				        	if (isScale) {
-				        		setPosition(e, $(this));
+				        		setPosition(e);
 				        	}
 				        });
 				        $('.scaleControl').mouseup(function(e){
-				        	setPosition(e, $(this));
+				        	setPosition(e);
 				        	isScale = false;
 				        });
-				        function setPosition(e, obj){
-				        	img.css("width",(e.pageX - x + 30));
-				        	img.css("height",(e.pageY - y + 30));
-				        	obj.css("left", e.pageX - 30);
-				        	obj.css("top", e.pageY - 30);
+				        function setPosition(e){
+				        	img.css("width",(e.pageX - x));
+				        	img.css("height",(e.pageY - y));
 
 				        }
 				    });
