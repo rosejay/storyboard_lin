@@ -10,6 +10,8 @@ $(document).ready(function(){
 		var temphtml = "";
 		var temphtmldrop = "";
 
+		var currentFolder= 0;
+
 		for(var i = 0; i<res.files.length; i++){
 			var attr = res.files[i].split("/");
 
@@ -106,10 +108,21 @@ $(document).ready(function(){
 				}
 			);
 
+			currentFolder = num;
 		}
 
+		// add dragstart event;
 
-			
+		$('.material-list li').each(function(){
+			var img = $(this).find('')
+			this.addEventListener('dragstart', function(e){
+				e.dataTransfer.setData('text/plain', JSON.stringify({
+					src : "materials/"+folders[currentFolder]+"/"+e.target.innerHTML
+				}))
+			  	this.style.opacity = '0.4';  // this / e.target is the source node.
+			}, false);
+		})
+
 	}) 
 	
 	init();
@@ -122,7 +135,6 @@ $(document).ready(function(){
 
 		var isLeftShow = 1;
 		var slidenum = 0;
-		var imagenum = 0;
 		var topDistance = 0;
 
 		addBigSlides();
@@ -145,14 +157,6 @@ $(document).ready(function(){
 			$('.right-panel').append(newSlideHtml);
 
 
-			var dragTarget;
-			function handleDragStart(e) {
-				alert("d");
-				dragTarget = e.target.src;
-				console.log(dragTarget);
-			  	this.style.opacity = '0.4';  // this / e.target is the source node.
-			}
-
 			function dragStyle(e){
 				e.stopPropagation();
 				e.preventDefault();
@@ -165,10 +169,7 @@ $(document).ready(function(){
 				$('#dropzone').removeClass('rounded');
 				$('#dropzone').css("z-index",0);
 			}
-			var cols = document.querySelectorAll('.material-list ul li');
-			[].forEach.call(cols, function(col) {
-			  	col.addEventListener('dragstart', handleDragStart, false);		
-			});
+
 			document.getElementById('dropzone').addEventListener('dragenter', function(e) {
 				dragStyle(e);
 			});
@@ -183,45 +184,30 @@ $(document).ready(function(){
 				
 				e.stopPropagation();
 				e.preventDefault();
-				if (dragTarget) {  //drop img from left list
-					imagenum++;
+				if ( ! e.dataTransfer.files.length ) {  //drop img from left list
 
-					var $box = $("<div id='imgBox"+imagenum+"' class='img-box'></div>");
+					var data = e.dataTransfer.getData('text/plain');
+					if(data){
+						data = JSON.parse(data);
+					}
+
+					var $box = createImageBox(data.src);
+
 					$('#dropzone').append($box);
-
-					var img =document.createElement('img');
-					img.id="img"+imagenum;
-					img.src = dragTarget;
-
-					document.getElementById('imgBox'+imagenum).appendChild(img);
 
 				}
 				else{  //drop img from desktop
-					imagenum++;
 
 					var reader = new FileReader();
 					reader.onload = function(evt) {
-						var img =document.createElement('img');
-						img.id="img"+imagenum;
-						img.onload = function(){
-							$(img).attr('width', img.width+'px');
-							$(img).attr('height', img.height+'px');
-							$(img).resizable();
-						}
-						img.src=evt.target.result;
 						
-						var $box = $("<div id='imgBox"+imagenum+"' class='img-box'></div>");
-						$('#dropzone').append($box);
-						// make image dragable
-						$box.addClass("ui-widget-content").draggable();
-
-						document.getElementById('imgBox'+imagenum).appendChild(img);
-						$box.append("<div class='scaleControl'></div><div class='deletePic'><div class='deleteBtn'></div><div class='text'><span>Really?</span><a click=''>Yes</a><span>/</span><a click=''>No</a></div></div>");
-					        
+						var $box = createImageBox(evt.target.result)
+						$('#dropzone').append( $box );
+    
 						topDistance += curWidth*height/width;
 
 						// click image add scale btn
-						$('#imgBox'+imagenum).click(function(e){
+						$box.click(function(e){
 							var img = $(this).children('img');
 							var x = $(this).attr("left");
 							var y = $(this).attr("top");
@@ -236,7 +222,6 @@ $(document).ready(function(){
 					};
 					reader.readAsDataURL(e.dataTransfer.files[0]);
 				}
-				dragTarget = "";
 				
 			}, false);
 
@@ -262,7 +247,41 @@ $(document).ready(function(){
 
 	}
 
+	var createImageBox = (function(){
+		var imageId = 0;
 
+		return function(src){
+
+			var img =document.createElement('img');
+			img.id="img"+imageId;
+
+			img.onload = function(){
+				$(img).attr('width', img.width+'px');
+				$(img).attr('height', img.height+'px');
+				$(img).resizable();
+			}
+			img.src= src;
+
+			var $box = $("<div id='imgBox"+imageId+"' class='img-box'></div>");
+			$box.append(img);
+			$box.append("<div class='scaleControl'></div>\
+						<div class='deletePic'>\
+							<div class='deleteBtn'></div>\
+							<div class='text'>\
+								<span>Really?</span>\
+								<a click=''>Yes</a>\
+								<span>/</span>\
+								<a click=''>No</a>\
+							</div>\
+						</div>");		    
+			// make image dragable
+			$box.addClass("ui-widget-content").draggable();
+
+			imageId++;
+
+			return $box;
+		}
+	})()
 
 
 	$('.addText').click(function(){
