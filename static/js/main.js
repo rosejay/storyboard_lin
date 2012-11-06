@@ -216,42 +216,44 @@ $(document).ready(function(){
 				        var w = $(this).width();
 				        var h = $(this).height();
 				        console.log(x,y,w,h);
-				        var div = 10;
-				        var wid = 20;
-				        var wid2 = 60;
+				        var div = 50;
 
-				        var xA = x+w-div-wid;
-				        var yA = y+h-div-wid;
-				        var xA2 = x+w-(div+wid+wid2)/2;
-				        var yA2 = y+h-(div+wid+wid2)/2;
+				        var xA = x+w-50;
+				        var yA = y+h-50;
+				        var xA2;
 
+				        if(isLeftShow)
+				        	xA2 = width - 250 - w - x +2;
+				        else
+				        	xA2 = width - w - x +2;
 
-				        $('body').append("<div class='scaleControl br5' style='left:"+xA+"px;top:"+yA+"px'></div><div class='scaleControl-alpha' style='left:"+xA2+"px;top:"+yA2+"px'></div>");
+				        var yA2 = y+10;
+
+				        $(this).addClass("selectedPic");
+				        $('#img'+imagenum).append("<div class='scaleControl' style='right:0;bottom:0'></div><div class='deletePic' style='right:10px;top:10px'><div class='deleteBtn'></div><div class='text'><span>Really?</span><a click=''>Yes</a><span>/</span><a click=''>No</a></div></div>");
 				        
-				        console.log(xA,yA);
+		
 				        var isScale = false;
-				        $('.scaleControl-alpha').mousedown(function(e){
+				        $('.scaleControl').mousedown(function(e){
 				        	if (!isScale) {
 				        		setPosition(e, $(this));
 					        	isScale = true;
 				        	}
 				        });
-				        $('.scaleControl-alpha').mousemove(function(e){
+				        $('.scaleControl').mousemove(function(e){
 				        	if (isScale) {
 				        		setPosition(e, $(this));
 				        	}
 				        });
-				        $('.scaleControl-alpha').mouseup(function(e){
+				        $('.scaleControl').mouseup(function(e){
 				        	setPosition(e, $(this));
 				        	isScale = false;
 				        });
 				        function setPosition(e, obj){
-				        	img.css("width",(e.pageX - x + wid/2 + div));
-				        	img.css("height",(e.pageY - y + wid/2 + div));
-				        	obj.css("left", e.pageX - wid2/2);
-				        	obj.css("top", e.pageY - wid2/2);
-				        	$('.scaleControl').css("left", e.pageX - wid/2);
-				        	$('.scaleControl').css("top", e.pageY - wid/2);
+				        	img.css("width",(e.pageX - x + 30));
+				        	img.css("height",(e.pageY - y + 30));
+				        	obj.css("left", e.pageX - 30);
+				        	obj.css("top", e.pageY - 30);
 
 				        }
 				    });
@@ -266,22 +268,51 @@ $(document).ready(function(){
 
 		}
 
+
+		  
+
 		$('.closeLeftBtn').click(function(e){
 			if(isLeftShow == 1){
 				$('.left-panel').animate({ left:-250 },150);
 				$('.right-panel').animate({ left:0 },150).animate({width: width},150);
-				$(this).animate({ left:15 },150).css("color", "#aaa");
+				$(this).animate({ left:15 },150).css("color", "#ccc");
 				isLeftShow = 0;
 			}
 			else{
 				$('.left-panel').animate({ left:0 },150);
 				$('.right-panel').animate({ left:250 },150).animate({width: width-250},150);
-				$(this).animate({ left:220 },150).css("color", "#444");
+				$(this).animate({ left:220 },150).css("color", "#ccc");
 				isLeftShow = 1;
 			}
 		});
 
 	}
+
+
+
+
+	$('.addText').click(function(){
+		setUpTangle () ;
+
+		function setUpTangle () {
+
+            var element = document.getElementById("text-editor");
+
+            var tangle = new Tangle(element, {
+                initialize: function () {
+                    this.fontsize = 30;
+                    this.bgalpha = 60;
+                },
+                update: function () {
+                    $('#text-editor .text').css("font-size", this.fontsize);
+                    $('#text-editor .text').css("background", "rgba(255,255,255,"+this.bgalpha/100.0+")");
+                    $('#text-editor .block.bg-alpha').css("background", "rgba(255,255,255,"+this.bgalpha/100.0+")");
+					$('#text-editor .block.fontsize').css("background", "rgba(255,255,255,"+this.bgalpha/100.0+")");
+                }
+            });
+        }
+
+	});
 
 	
 	
