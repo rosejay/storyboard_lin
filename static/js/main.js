@@ -1,11 +1,12 @@
 
 $(document).ready(function(){
-	init();
+	
 
 	var dirs = new Array(new Array(), new Array());
 	var folders = new Array();
 
 	$.get('http://localhost:8888/get/files', function(res){
+		//generate files dirs
 		var temphtml = "";
 		var temphtmldrop = "";
 
@@ -31,10 +32,9 @@ $(document).ready(function(){
 				dirs[0][0] = attr[3];
 				folders[0] = attr[2];
 			}
-			//temphtml += "<li>"+res.files[i].split("/")[3]+"</li>";
-
 		}
 
+		//init left combobox
 		for(i = 0; i<folders.length; i++)
 			temphtmldrop += "<li><a href='javascript:void(0)' val='"+i+"'>"+folders[i]+"</a></li>";
 		$('.J_select_drop ul').append(temphtmldrop);
@@ -43,7 +43,7 @@ $(document).ready(function(){
 
 		change_folder(0);
 
-		//
+		//combobox
 		$('.J_select_current_option').each(function(){
 			$(this).click(function(){
 				var $this = $(this), select_drop = $this.siblings('.J_select_drop'), show_input = $this.find('.J_input_show');
@@ -77,8 +77,6 @@ $(document).ready(function(){
 				return false;
 			})
 		});
-
-		//
 		function clearDrop(show_input){
 			show_input.blur(function(){
 				var opt = show_input.parents('.J_select_current_option');
@@ -88,6 +86,7 @@ $(document).ready(function(){
 			});
 		}
 
+		//
 		function change_folder(num){
 			$('.material-list ul li').remove();
 			temphtml = "";
@@ -109,38 +108,11 @@ $(document).ready(function(){
 
 		}
 
-			function handleDragStart(e) {
-			  	this.style.opacity = '0.4';  // this / e.target is the source node.
-			}
 
-			function dragStyle(e){
-				e.stopPropagation();
-				e.preventDefault();
-				$('#dropzone').addClass('rounded');
-				$('#dropzone').css("z-index",100);
-			}
-			function removeDragStyle(e){
-				e.stopPropagation();
-				e.preventDefault();
-				$('#dropzone').removeClass('rounded');
-				$('#dropzone').css("z-index",0);
-			}
-			var cols = document.querySelectorAll('.material-list ul li');
-			[].forEach.call(cols, function(col) {
-			  	col.addEventListener('dragstart', handleDragStart, false);			});
-			document.getElementById('dropzone').addEventListener('dragenter', function(e) {
-				dragStyle(e);
-			});
-			document.getElementById('dropzone').addEventListener('dragover', function(e) {
-				dragStyle(e);
-			});
-			document.getElementById('dropzone').addEventListener('dragleave', function(e) {
-				removeDragStyle(e);
-			});
 			
 	}) 
 	
-	
+	init();
 		
 	function init(){
 		var width=window.innerWidth;
@@ -173,54 +145,98 @@ $(document).ready(function(){
 			$('.right-panel').append(newSlideHtml);
 
 
+			var dragTarget;
+			function handleDragStart(e) {
+				alert("d");
+				dragTarget = e.target.src;
+				console.log(dragTarget);
+			  	this.style.opacity = '0.4';  // this / e.target is the source node.
+			}
 
-
-			document.getElementById('dropzone').addEventListener('drop', function(e) {
+			function dragStyle(e){
 				e.stopPropagation();
 				e.preventDefault();
-				imagenum++;
-				alert("d");
-				var reader = new FileReader();
-				reader.onload = function(evt) {
-					var img =document.createElement('img');
-					img.id="img"+imagenum;
-					img.onload = function(){
-						$(img).attr('width', img.width+'px');
-						$(img).attr('height', img.height+'px');
-						$(img).resizable();
-					}
-					img.src=evt.target.result;
-					
+				$('#dropzone').addClass('rounded');
+				$('#dropzone').css("z-index",100);
+			}
+			function removeDragStyle(e){
+				e.stopPropagation();
+				e.preventDefault();
+				$('#dropzone').removeClass('rounded');
+				$('#dropzone').css("z-index",0);
+			}
+			var cols = document.querySelectorAll('.material-list ul li');
+			[].forEach.call(cols, function(col) {
+			  	col.addEventListener('dragstart', handleDragStart, false);		
+			});
+			document.getElementById('dropzone').addEventListener('dragenter', function(e) {
+				dragStyle(e);
+			});
+			document.getElementById('dropzone').addEventListener('dragover', function(e) {
+				dragStyle(e);
+			});
+			document.getElementById('dropzone').addEventListener('dragleave', function(e) {
+				removeDragStyle(e);
+			});
+
+			document.getElementById('dropzone').addEventListener('drop', function(e) {
+				
+				e.stopPropagation();
+				e.preventDefault();
+				if (dragTarget) {  //drop img from left list
+					imagenum++;
+
 					var $box = $("<div id='imgBox"+imagenum+"' class='img-box'></div>");
 					$('#dropzone').append($box);
-					// make image dragable
-					$box.addClass("ui-widget-content").draggable();
+
+					var img =document.createElement('img');
+					img.id="img"+imagenum;
+					img.src = dragTarget;
 
 					document.getElementById('imgBox'+imagenum).appendChild(img);
-					$box.append("<div class='scaleControl'></div><div class='deletePic'><div class='deleteBtn'></div><div class='text'><span>Really?</span><a click=''>Yes</a><span>/</span><a click=''>No</a></div></div>");
-				        
-					topDistance += curWidth*height/width;
 
-					// click image add scale btn
-					$('#imgBox'+imagenum).click(function(e){
-						var img = $(this).children('img');
-						var x = $(this).attr("left");
-						var y = $(this).attr("top");
+				}
+				else{  //drop img from desktop
+					imagenum++;
 
-				        var isScale = false;
-				        
-				        function setPosition(e){
-				        	img.css("width",(e.pageX - x));
-				        	img.css("height",(e.pageY - y));
+					var reader = new FileReader();
+					reader.onload = function(evt) {
+						var img =document.createElement('img');
+						img.id="img"+imagenum;
+						img.onload = function(){
+							$(img).attr('width', img.width+'px');
+							$(img).attr('height', img.height+'px');
+							$(img).resizable();
+						}
+						img.src=evt.target.result;
+						
+						var $box = $("<div id='imgBox"+imagenum+"' class='img-box'></div>");
+						$('#dropzone').append($box);
+						// make image dragable
+						$box.addClass("ui-widget-content").draggable();
 
-				        }
-				    });
+						document.getElementById('imgBox'+imagenum).appendChild(img);
+						$box.append("<div class='scaleControl'></div><div class='deletePic'><div class='deleteBtn'></div><div class='text'><span>Really?</span><a click=''>Yes</a><span>/</span><a click=''>No</a></div></div>");
+					        
+						topDistance += curWidth*height/width;
 
+						// click image add scale btn
+						$('#imgBox'+imagenum).click(function(e){
+							var img = $(this).children('img');
+							var x = $(this).attr("left");
+							var y = $(this).attr("top");
 
-
-				};
-				
-				reader.readAsDataURL(e.dataTransfer.files[0]);
+					        var isScale = false;
+					        
+					        function setPosition(e){
+					        	img.css("width",(e.pageX - x));
+					        	img.css("height",(e.pageY - y));
+					        }
+					    });
+					};
+					reader.readAsDataURL(e.dataTransfer.files[0]);
+				}
+				dragTarget = "";
 				
 			}, false);
 
