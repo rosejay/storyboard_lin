@@ -182,46 +182,43 @@ $(document).ready(function(){
 				reader.onload = function(evt) {
 					var img =document.createElement('img');
 					img.id="img"+imagenum;
+					img.onload = function(){
+						$(img).attr('width', img.width+'px');
+						$(img).attr('height', img.height+'px');
+						$(img).resizable();
+					}
 					img.src=evt.target.result;
 					
-					
-					$('#dropzone').append("<div id='imgBox"+imagenum+"' style='z-index:0;'></div>");
+					var $box = $("<div id='imgBox"+imagenum+"' class='img-box'></div>");
+					$('#dropzone').append($box);
 					// make image dragable
-					$('#imgBox'+imagenum).addClass("ui-widget-content").draggable();
-					
+					$box.addClass("ui-widget-content").draggable();
 
 					document.getElementById('imgBox'+imagenum).appendChild(img);
-					$('#imgBox'+imagenum).append("<div class='scaleControl' style='right:-7px;bottom:0'></div><div class='deletePic' style='right:3px;top:10px'><div class='deleteBtn'></div><div class='text'><span>Really?</span><a click=''>Yes</a><span>/</span><a click=''>No</a></div></div>");
+					$box.append("<div class='scaleControl' style='right:-7px;bottom:0'></div><div class='deletePic' style='right:3px;top:10px'><div class='deleteBtn'></div><div class='text'><span>Really?</span><a click=''>Yes</a><span>/</span><a click=''>No</a></div></div>");
 				        
 					topDistance += curWidth*height/width;
 
-					img.onload = function(){
-						$('#imgBox'+imagenum).css("width",img.width).css("height",img.height);
-						if(img.width>img.height){
-							;
-							//document.getElementById('img'+imagenum).css("width","100%");
-						}
-						else
-							;
-							//document.getElementById('img'+imagenum).css("height","100%");
-					}
 					
-					// click image remove scale btn
-					$('#imgBox'+imagenum).mousedown(function(e){
-					});
+					// scale control
+					var $scaleControl = $box.find('.scaleControl'),
+						$deletePic = $box.find('.deletePic');
 
-					$('#imgBox'+imagenum).hover(
-						function(e){
-							$('.scaleControl').fadeIn(150);
-							$('.deletePic').fadeIn(150);
-							$(this).children('img').addClass("selectedPic");
-						},
-						function(e){
-							$('.scaleControl').fadeOut(150);
-							$('.deletePic').fadeOut(150);
-							$(this).children('img').removeClass("selectedPic");
-						}
-					);
+					$scaleControl.mousedown(function(e){
+			        	e.stopPropagation();
+						e.preventDefault();
+		        		setPosition(e);
+			        	isScale = true;
+			        });
+			        $scaleControl.mousemove(function(e){
+			        	if (isScale) {
+			        		setPosition(e);
+			        	}
+			        });
+			        $scaleControl.mouseup(function(e){
+			        	setPosition(e);
+			        	isScale = false;
+			        });
 
 					// click image add scale btn
 					$('#imgBox'+imagenum).click(function(e){
@@ -230,24 +227,7 @@ $(document).ready(function(){
 						var y = $(this).attr("top");
 
 				        var isScale = false;
-				        $('.scaleControl').mousedown(function(e){
-				        	e.stopPropagation();
-							e.preventDefault();
-				        	if (!isScale) {
-				        		setPosition(e);
-					        	isScale = true;
-					        	alert("d");
-				        	}
-				        });
-				        $('.scaleControl').mousemove(function(e){
-				        	if (isScale) {
-				        		setPosition(e);
-				        	}
-				        });
-				        $('.scaleControl').mouseup(function(e){
-				        	setPosition(e);
-				        	isScale = false;
-				        });
+				        
 				        function setPosition(e){
 				        	img.css("width",(e.pageX - x));
 				        	img.css("height",(e.pageY - y));
