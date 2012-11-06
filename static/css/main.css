@@ -30,6 +30,12 @@ div{display: block;}
 .br10{-moz-border-radius:10px;-webkit-border-radius:10px;border-radius:10px;}
 .br5{-moz-border-radius:5px;-webkit-border-radius:5px;border-radius:5px;}
 
+[draggable] {
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
 
 .select-ctrl{width:220px;position:relative;margin:0 15px; }
 .select-ctrl .current-option{ position:relative;z-index:9;height:40px;background:url("../img/file.png") #ccc no-repeat;padding-left:10px; cursor:pointer;box-shadow:0 0 5px rgba(0,0,0,.2);}
@@ -90,9 +96,10 @@ html{
 	cursor: pointer;
 	padding: 0 15px;
 	height: 33px;
-	width: 220px;
+	width: 180px;
 	border-bottom: 1px solid #ccc;
 	line-height: 33px;
+	cursor: move;
 }
 .left-panel .material-list ul li:hover{
 	color: #333;
@@ -118,42 +125,39 @@ html{
 	display:inline-block;
 }
 .img-box:hover{
-	border: 4px solid #fff;
 	-moz-box-shadow: 0 0 5px #aaa;
 	-webkit-box-shadow: 0 0 5px #aaa;
 	box-shadow: 0 0 5px #aaa;
-	margin-left: -4px;
-	margin-top: -4px;
 }
 .img-box:hover .scaleControl,
 .img-box:hover .deletePic{
 	opacity:1.0;
 
-	transition:all 1.5s;
-	-moz-transition:all 1.5s; /* Firefox 4 */
-	-webkit-transition:all 1.5s; /* Safari and Chrome */
-	-o-transition:all 1.5s; /* Opera */
+	transition:all 0.5s;
+	-moz-transition:all 0.5s; /* Firefox 4 */
+	-webkit-transition:all 0.5s; /* Safari and Chrome */
+	-o-transition:all 0.5s; /* Opera */
 }
 
 .scaleControl{
-	z-index: 1000;
 	background: url(../img/scale.png);
 	width: 60px;
 	height: 60px;
 	position: absolute;
-	cursor: pointer;
+	right: 0;
+	bottom: 0;
+	cursor: se-resize;
 	opacity:0;
-	display: none;
 }
 .deletePic{
 	z-index: 1000;
 	position: absolute;
-	
+	right: 10px;
+	top: 10px;
 	width: 40px;
 	height: 40px;
-
 	overflow: hidden;
-	font-weight: bold;
+	
 	color: #fff;
 	opacity:0;
 }
@@ -187,10 +191,11 @@ html{
 }
 .deletePic .text a{
 	cursor: pointer;
-	color: #f0595f;
+	color: #fff;
+	font-weight: bold;
 }
 .deletePic .text a:hover{
-	color: #f0595f;
+	color: #fff;
 	text-decoration: underline;
 
 }
@@ -316,4 +321,12 @@ html{
 	cursor: pointer;
 	z-index: 100000;
 	background: url(../img/addtext.png);
+}
+
+
+#dropzone.rounded {
+	-webkit-box-shadow: inset 0px 0px 15px #ccc;
+	-moz-box-shadow: inset 0px 0px 15px #ccc;
+	-o-box-shadow: inset 0px 0px 15px #ccc;
+	box-shadow: inset 0px 0px 15px #ccc;
 }

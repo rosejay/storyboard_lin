@@ -92,7 +92,7 @@ $(document).ready(function(){
 			$('.material-list ul li').remove();
 			temphtml = "";
 			for(i = 0; i<dirs[num].length; i++)
-				temphtml += "<li val='"+num+"'>"+dirs[num][i]+"</li>";
+				temphtml += "<li val='"+num+"' draggable='true'>"+dirs[num][i]+"</li>";
 			$('.material-list ul').append(temphtml);
 
 			$('.material-list li').hover(
@@ -108,6 +108,36 @@ $(document).ready(function(){
 			);
 
 		}
+
+			function handleDragStart(e) {
+			  	this.style.opacity = '0.4';  // this / e.target is the source node.
+			}
+
+			function dragStyle(e){
+				e.stopPropagation();
+				e.preventDefault();
+				$('#dropzone').addClass('rounded');
+				$('#dropzone').css("z-index",100);
+			}
+			function removeDragStyle(e){
+				e.stopPropagation();
+				e.preventDefault();
+				$('#dropzone').removeClass('rounded');
+				$('#dropzone').css("z-index",0);
+			}
+			var cols = document.querySelectorAll('.material-list ul li');
+			[].forEach.call(cols, function(col) {
+			  	col.addEventListener('dragstart', handleDragStart, false);			});
+			document.getElementById('dropzone').addEventListener('dragenter', function(e) {
+				dragStyle(e);
+			});
+			document.getElementById('dropzone').addEventListener('dragover', function(e) {
+				dragStyle(e);
+			});
+			document.getElementById('dropzone').addEventListener('dragleave', function(e) {
+				removeDragStyle(e);
+			});
+			
 	}) 
 	
 	
@@ -125,8 +155,6 @@ $(document).ready(function(){
 
 		addBigSlides();
 
-		console.log(isLeftShow,slidenum);
-
 		function addBigSlides(){
 			slidenum++;
 			var newSlideHtml = "";
@@ -141,43 +169,17 @@ $(document).ready(function(){
 				curLeft = 0;
 			}
 				
-			console.log(isLeftShow,curWidth,slidenum);
 			newSlideHtml +="<div id='dropzone' class='slides slide-"+slidenum+ " dropzone' style='position:absolute;top:"+topDistance+";left:"+curLeft+"px;width:"+curWidth+"px;height:"+height+"px'></div>";
 			$('.right-panel').append(newSlideHtml);
 
-			function dragStyle(e){
-				e.stopPropagation();
-				e.preventDefault();
-				$('#dropzone').addClass('rounded');
-				$('#dropzone').html('Drop in images from your desktop!');
-				$('#dropzone').css("z-index",100);
-			}
-			/*
-			function removeDragStyle(e){
-				e.stopPropagation();
-				e.preventDefault();
-				$('#dropzone').removeClass('rounded');
-				$('#dropzone').empty();
-				$('#dropzone').css("z-index",0);
-				$('.addpicBtn').addClass('sel');
-			}
-			$('#dropzone').bind('dragenter', function(e) {
-				dragStyle(e);
-			}, false);
-			$('#dropzone').bind('dragover', function(e) {
-				dragStyle(e);
-			}, false);
-			$('#dropzone').bind('dragleave', function(e) {
-				removeBGimg();
-				removeDragStyle(e);
-			}, false);
-*/
-			document.getElementById('dropzone').addEventListener('drop', function(e) {
-				//removeDragStyle(e);
-				imagenum++;
-				e.stopPropagation();
-				e.preventDefault();
 
+
+
+			document.getElementById('dropzone').addEventListener('drop', function(e) {
+				e.stopPropagation();
+				e.preventDefault();
+				imagenum++;
+				alert("d");
 				var reader = new FileReader();
 				reader.onload = function(evt) {
 					var img =document.createElement('img');
@@ -195,7 +197,7 @@ $(document).ready(function(){
 					$box.addClass("ui-widget-content").draggable();
 
 					document.getElementById('imgBox'+imagenum).appendChild(img);
-					$box.append("<div class='scaleControl' style='right:-7px;bottom:0'></div><div class='deletePic' style='right:3px;top:10px'><div class='deleteBtn'></div><div class='text'><span>Really?</span><a click=''>Yes</a><span>/</span><a click=''>No</a></div></div>");
+					$box.append("<div class='scaleControl'></div><div class='deletePic'><div class='deleteBtn'></div><div class='text'><span>Really?</span><a click=''>Yes</a><span>/</span><a click=''>No</a></div></div>");
 				        
 					topDistance += curWidth*height/width;
 
