@@ -4,6 +4,7 @@ $(document).ready(function(){
 
 	var dirs = new Array(new Array(), new Array());
 	var folders = new Array();
+	var isLeftShow = 1;
 
 	$.get('http://localhost:8888/get/files', function(res){
 		//generate files dirs
@@ -131,9 +132,9 @@ $(document).ready(function(){
 		var width=window.innerWidth;
 		var height=window.innerHeight;
 		$('.left-panel').css("height",height);
-		$('.left-panel .material-list').css("height",height-70);
+		$('.left-panel .material-list').css("height",height-125);
 
-		var isLeftShow = 1;
+		
 		var slidenum = 0;
 		var topDistance = 0;
 
@@ -153,7 +154,7 @@ $(document).ready(function(){
 				curLeft = 0;
 			}
 				
-			newSlideHtml +="<div id='dropzone' class='slides slide-"+slidenum+ " dropzone' style='position:absolute;top:"+topDistance+";left:"+curLeft+"px;width:"+curWidth+"px;height:"+height+"px'></div>";
+			newSlideHtml +="<div id='dropzone' class='slides slide-"+slidenum+ " dropzone' style='position:absolute; top:"+topDistance+";left:"+curLeft+"px;width:"+curWidth+"px;height:"+height+"px'></div>";
 			$('.right-panel').append(newSlideHtml);
 
 
@@ -191,7 +192,7 @@ $(document).ready(function(){
 						data = JSON.parse(data);
 					}
 
-					var $box = createImageBox(data.src);
+					var $box = createImageBox(data.src, e.pageX, e.pageY);
 
 					$('#dropzone').append($box);
 
@@ -201,7 +202,7 @@ $(document).ready(function(){
 					var reader = new FileReader();
 					reader.onload = function(evt) {
 						
-						var $box = createImageBox(evt.target.result)
+						var $box = createImageBox(evt.target.result, e.pageX, e.pageY)
 						$('#dropzone').append( $box );
     
 						topDistance += curWidth*height/width;
@@ -231,13 +232,13 @@ $(document).ready(function(){
 		  
 
 		$('.closeLeftBtn').click(function(e){
-			if(isLeftShow == 1){
+			if(isLeftShow == 1){// close left
 				$('.left-panel').animate({ left:-250 },150);
 				$('.right-panel').animate({ left:0 },150).animate({width: width},150);
 				$(this).animate({ left:15 },150).css("color", "#ccc");
 				isLeftShow = 0;
 			}
-			else{
+			else{// open left
 				$('.left-panel').animate({ left:0 },150);
 				$('.right-panel').animate({ left:250 },150).animate({width: width-250},150);
 				$(this).animate({ left:220 },150).css("color", "#ccc");
@@ -250,7 +251,7 @@ $(document).ready(function(){
 	var createImageBox = (function(){
 		var imageId = 0;
 
-		return function(src){
+		return function(src,x,y){
 
 			var img =document.createElement('img');
 			img.id="img"+imageId;
@@ -262,7 +263,27 @@ $(document).ready(function(){
 			}
 			img.src= src;
 
-			var $box = $("<div id='imgBox"+imageId+"' class='img-box'></div>");
+			var winWidth = window.innerWidth;
+			if(isLeftShow){
+				x -= 250;
+				winWidth -= 250;
+			}
+				
+			if((x-img.width/2)<0)
+				x = 0;
+			else if((x+img.width/2)>winWidth)
+				x = winWidth - img.width;
+			else
+				x = x-img.width/2;
+
+			if((y-img.height/2)<0)
+				y=0;
+			else if((y+img.width/2)>window.innerHeight)
+				y = window.innerHeight - img.height;
+			else
+				y = y-img.height/2;
+
+			var $box = $("<div id='imgBox"+imageId+"' style='position:absolute;left:"+x+"px;top:"+y+"px' class='img-box'></div>");
 			$box.append(img);
 			$box.append("<div class='scaleControl'></div>\
 						<div class='deletePic'>\
@@ -275,7 +296,7 @@ $(document).ready(function(){
 							</div>\
 						</div>");		    
 			// make image dragable
-			$box.addClass("ui-widget-content").draggable();
+			$box.draggable();
 
 			imageId++;
 
@@ -283,36 +304,117 @@ $(document).ready(function(){
 		}
 	})()
 
+    
+      
 
-	$('.addText').click(function(){
-		setUpTangle () ;
+	var createTextBox = (function(){
+		var textId = 0;
 
-		function setUpTangle () {
+		return function(x,y){
+			var tempWidth = 540;
+			var tempHeight = 135;
+			var winWidth = window.innerWidth;
 
-            var element = document.getElementById("text-editor");
+			console.log(x);
+			if(isLeftShow){
+				x -= 250;
+				winWidth -=250;
+			}
 
-            var tangle = new Tangle(element, {
-                initialize: function () {
-                    this.fontsize = 30;
-                    this.bgalpha = 60;
-                },
-                update: function () {
-                    $('#text-editor .text').css("font-size", this.fontsize);
-                    $('#text-editor .text').css("background", "rgba(255,255,255,"+this.bgalpha/100.0+")");
-                    $('#text-editor .block.bg-alpha').css("background", "rgba(255,255,255,"+this.bgalpha/100.0+")");
-					$('#text-editor .block.fontsize').css("background", "rgba(255,255,255,"+this.bgalpha/100.0+")");
-                }
-            });
-        }
+			if((x+tempWidth)>window.innerWidth)
+				x = winWidth - tempWidth;
+
+			if((y+tempHeight)>window.innerHeight)
+				y = window.innerHeight - tempHeight;
+
+			var $box = $("<div class='text-editor' style='left:"+x+"px;top:"+y+"px;position:absolute' id='text-editor"+textId+"'>");
+
+			$box.append("<input type='text' class='text' value='Ye Lin' onLoad=”this.focus()”>\
+      			<div class='attr'>\
+        			<div class='block background'>\
+        				<div class='bgcolor block'></div>\
+        				<div class='color1 block' val='1'></div>\
+          				<div class='color2 block' val='2'></div>\
+         				<div class='color3 block sel' val='3'></div>\
+          				<div class='color4 block' val='4'></div>\
+          				<div class='color5 block' val='5'></div>\
+        			</div>\
+        			<div class='block bg-alpha'><p class='TKAdjustableNumber ' data-var='bgalpha' data-min='0' data-max='100'>%</p></div>\
+        			<div class='block fontsize'><p class='TKAdjustableNumber ' data-var='fontsize' data-min='10' data-max='60'></p></div>\
+        			<div class='block fontcolor'>\
+        				<div class='fontcolor block'></div>\
+        				<div class='color1 block sel' val='1'></div>\
+          				<div class='color2 block' val='2'></div>\
+         				<div class='color3 block' val='3'></div>\
+          				<div class='color4 block' val='4'></div>\
+          				<div class='color5 block' val='5'></div>\
+        			</div>\
+     			</div></div>");		 
+
+			// make image dragable
+			$box.draggable();
+
+			textId++;
+			return $box;
+		}
+	})()
+
+	var isAddText = 0;
+	$('.addText').click(function(e){
+		isAddText = 1;
+
+		$('#dropzone').click(function(e){
+			if(isAddText){
+				var $box = createTextBox(e.pageX,e.pageY);
+				$(this).append($box);
+
+				$('#dropzone .text').click(function(e){ 
+					alert("dd");
+					var text = $(this).val();
+					console.log(text);
+
+					$("<p class='text'>"+text+"<span class='deleteText'></span></p>").insertAfter('.text');
+					$(this).remove();
+				});
+
+
+				isAddText = 0;
+
+				setUpTangle();
+				function setUpTangle () {
+
+		            var element = $box;
+
+		            var tangle = new Tangle( {
+		                initialize: function () {
+		                    this.fontsize = 30;
+		                    this.bgalpha = 60;
+		                },
+		                update: function () {
+		                	alert("d");
+		                    $box.children('text').css("font-size", this.fontsize).css("background", "rgba(255,255,255,"+this.bgalpha/100.0+")");
+		                    $box.child().children('bg-alpha').css("background", "rgba(255,255,255,"+this.bgalpha/100.0+")");
+							$box.child().children('fontsize').css("background", "rgba(255,255,255,"+this.bgalpha/100.0+")");
+		                }
+		            });
+		        }
+			}
+				
+
+		});
 
 	});
 
 	
+
+	
 	
 
 
 	
-
+	$(window).resize(function() {
+		
+	});
 
 
 	

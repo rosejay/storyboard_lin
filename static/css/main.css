@@ -121,6 +121,7 @@ html{
 }
 
 .img-box{
+	position: absolute;
 	z-index:0;
 	display:inline-block;
 }
@@ -251,20 +252,22 @@ html{
 .text-editor{
 	position: absolute;
 	width: 500px;
-	left: 300px;
-	font-weight: bold;
+	height: 135px;
 }
 .text-editor .text{
 	font-size: 30px;
 	line-height: 60px;
-	padding: 10px 20px;
+	padding: 10px 20px 0;
 	width: 100%;
-	color: #f0595f;
+	color: #f07898;
 	background: rgba(255, 255, 255, 0.6);
+	float: left;
+	font-weight: bold;
+}
+.text-editor .text:hover{
 	-moz-box-shadow: 0 0 5px #aaa;
 	-webkit-box-shadow: 0 0 5px #aaa;
 	box-shadow: 0 0 5px #aaa;
-	float: left;
 }
 .text-editor .text span{
 	float: right;
@@ -289,10 +292,51 @@ html{
 	font-size: 20px;
 	line-height: 60px;
 	text-align: center;
+	font-weight: bold;
 }
+
 .text-editor .block.background{
 	float: left;
+	overflow: hidden;
+	width: 60px;
+	transition:all 0.5s;
+	-moz-transition:all 0.5s; /* Firefox 4 */
+	-webkit-transition:all 0.5s; /* Safari and Chrome */
+	-o-transition:all 0.5s; /* Opera */
+}
+.text-editor .block.background:hover{
+	width: 300px;
+}
+.text-editor .block.background .block{
+	float: right;
+	cursor: pointer;
+	opacity: 0.5;
+}
+.text-editor .block.background .block:hover, .text-editor .block.background .block.sel{
+	opacity: 1;
+}
+.text-editor .block.background:hover .block.bgcolor{
+	display: none;
+}
+.text-editor .block.background .block.bgcolor{
+	opacity: 1;
 	background: #fff;
+	cursor: default;
+}
+.text-editor .block.background .block.color1{
+	background: #f07898;
+}
+.text-editor .block.background .block.color2{
+	background: #53c5c5;
+}
+.text-editor .block.background .block.color3{
+	background: #fff;
+}
+.text-editor .block.background .block.color4{
+	background: #aaa;
+}
+.text-editor .block.background .block.color5{
+	background: #000;
 }
 .text-editor .block.bg-alpha{
 	float: left;
@@ -303,11 +347,51 @@ html{
 	background: url(../img/alpha-s.png);
 }
 .text-editor .block.fontcolor{
-	background: #f0595f;
 	float: right;
+	overflow: hidden;
+	width: 60px;
+	transition:all 0.5s;
+	-moz-transition:all 0.5s; /* Firefox 4 */
+	-webkit-transition:all 0.5s; /* Safari and Chrome */
+	-o-transition:all 0.5s; /* Opera */
 }
+.text-editor .block.fontcolor:hover{
+	width: 300px;
+}
+.text-editor .block.fontcolor .block{
+	float: left;
+	cursor: pointer;
+	opacity: 0.5;
+}
+.text-editor .block.fontcolor .block:hover, .text-editor .block.fontcolor .block.sel{
+	opacity: 1;
+}
+.text-editor .block.fontcolor:hover .block.fontcolor{
+	display: none;
+}
+.text-editor .block.fontcolor .block.fontcolor{
+	background: #f07898;
+	opacity: 1;
+	cursor: default;
+}
+.text-editor .block.fontcolor .block.color1{
+	background: #f07898;
+}
+.text-editor .block.fontcolor .block.color2{
+	background: #53c5c5;
+}
+.text-editor .block.fontcolor .block.color3{
+	background: #fff;
+}
+.text-editor .block.fontcolor .block.color4{
+	background: #aaa;
+}
+.text-editor .block.fontcolor .block.color5{
+	background: #000;
+}
+
 .text-editor .block.fontsize{
-	color: #f0595f;
+	color: #f07898;
 	float: right;
 	background: rgba(255,255,255,0.6);
 }
@@ -323,7 +407,9 @@ html{
 	background: url(../img/addtext.png);
 }
 
-
+#dropzone{
+	position: relative;
+}
 #dropzone.rounded {
 	-webkit-box-shadow: inset 0px 0px 15px #ccc;
 	-moz-box-shadow: inset 0px 0px 15px #ccc;
