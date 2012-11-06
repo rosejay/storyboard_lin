@@ -199,27 +199,6 @@ $(document).ready(function(){
 				        
 					topDistance += curWidth*height/width;
 
-					
-					// scale control
-					var $scaleControl = $box.find('.scaleControl'),
-						$deletePic = $box.find('.deletePic');
-
-					$scaleControl.mousedown(function(e){
-			        	e.stopPropagation();
-						e.preventDefault();
-		        		setPosition(e);
-			        	isScale = true;
-			        });
-			        $scaleControl.mousemove(function(e){
-			        	if (isScale) {
-			        		setPosition(e);
-			        	}
-			        });
-			        $scaleControl.mouseup(function(e){
-			        	setPosition(e);
-			        	isScale = false;
-			        });
-
 					// click image add scale btn
 					$('#imgBox'+imagenum).click(function(e){
 						var img = $(this).children('img');
