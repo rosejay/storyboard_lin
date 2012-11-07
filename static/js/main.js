@@ -141,17 +141,15 @@ $(document).ready(function(){
 			slidenum++;
 			var newSlideHtml = "";
 
-			var curWidth, curLeft;
+			var curWidth;
 			if (isLeftShow) {
 				curWidth = width - 250;
-				curLeft = 250;
 			}
 			else{
 				curWidth = width;
-				curLeft = 0;
 			}
 				
-			newSlideHtml +="<div id='dropzone' class='slides slide-"+slidenum+ " dropzone' style='position:absolute; top:"+topDistance+";left:"+curLeft+"px;width:"+curWidth+"px;height:"+height+"px'></div>";
+			newSlideHtml +="<div id='dropzone' class='slides slide-"+slidenum+ " dropzone' style='position:absolute; top:0;left:0;width:100%;height:100%'></div>";
 			$('.right-panel').append(newSlideHtml);
 
 
@@ -179,9 +177,8 @@ $(document).ready(function(){
 			});
 
 			document.getElementById('dropzone').addEventListener('drop', function(e) {
-				
-				e.stopPropagation();
-				e.preventDefault();
+				removeDragStyle(e);
+
 				if ( ! e.dataTransfer.files.length ) {  //drop img from left list
 
 					var data = e.dataTransfer.getData('text/plain');
@@ -258,25 +255,12 @@ $(document).ready(function(){
 			}
 			img.src= src;
 
-			var winWidth = window.innerWidth;
-			if(isLeftShow){
+			if (isLeftShow)
 				x -= 250;
-				winWidth -= 250;
-			}
-				
-			if((x-img.width/2)<0)
-				x = 0;
-			else if((x+img.width/2)>winWidth)
-				x = winWidth - img.width;
-			else
-				x = x-img.width/2;
 
-			if((y-img.height/2)<0)
-				y=0;
-			else if((y+img.width/2)>window.innerHeight)
-				y = window.innerHeight - img.height;
-			else
-				y = y-img.height/2;
+			x = x-img.width/2;
+
+			y = y-img.height/2;
 
 			var $box = $("<div id='imgBox"+imageId+"' style='position:absolute;left:"+x+"px;top:"+y+"px' class='img-box'></div>");
 			$box.append(img);
@@ -304,6 +288,22 @@ $(document).ready(function(){
 
 	var createTextBox = (function(){
 		var textId = 0;
+		var color1 = (240,120,152);
+		var color2 = (83,197,197);
+		var color3 = (255,255,255);
+		var color4 = (195,195,195);
+		var color5 = (0,0,0);
+
+		var textcolor = "rgb(240,120,152)";
+		var textbgcolor = new Array();
+		textbgcolor[0] = 255;
+		textbgcolor[1] = 255;
+		textbgcolor[2] = 255;
+		var textsize = 30;
+		var textbgalpha = 60;
+
+		textbgA = generateRGBA(textbgcolor, textbgalpha);
+		textbg = generateRGB(textbgcolor);
 
 		return function(x,y){
 			var tempWidth = 540;
@@ -323,21 +323,24 @@ $(document).ready(function(){
 
 			var $box = $("<div class='text-editor' style='left:"+x+"px;top:"+y+"px;position:absolute' id='text-editor"+textId+"'>");
 
-			$box.append("<input type='text' class='text' value='Ye Lin' onLoad=”this.focus()”>\
+			$box.append("<div class='textArea'>\
+					<input type='text' class='text' style='color:"+textcolor+"; background:"+textbgA+";font-size:"+textsize+"' value=''>\
+					<div class='textDone'></div>\
+				</div>\
       			<div class='attr'>\
         			<div class='block background'>\
-        				<div class='bgcolor block'></div>\
+        				<div class='bgcolor block' style='background:"+textbgA+"'></div>\
         				<div class='color1 block' val='1'></div>\
           				<div class='color2 block' val='2'></div>\
-         				<div class='color3 block sel' val='3'></div>\
+         				<div class='color3 block' val='3'></div>\
           				<div class='color4 block' val='4'></div>\
           				<div class='color5 block' val='5'></div>\
         			</div>\
-        			<div class='block bg-alpha'><p class='TKAdjustableNumber ' data-var='bgalpha' data-min='0' data-max='100'>%</p></div>\
-        			<div class='block fontsize'><p class='TKAdjustableNumber ' data-var='fontsize' data-min='10' data-max='60'></p></div>\
+        			<div class='block bg-alpha' style='color:"+textbg+";background:"+textbgA+"'><p class='TKAdjustableNumber ' data-var='bgalpha' data-min='0' data-max='100'>%</p></div>\
+        			<div class='block fontsize' style='color:"+textcolor+";background:"+textbgA+"'><p class='TKAdjustableNumber ' data-var='fontsize' data-min='10' data-max='60'></p></div>\
         			<div class='block fontcolor'>\
-        				<div class='fontcolor block'></div>\
-        				<div class='color1 block sel' val='1'></div>\
+        				<div class='fontcolor block' style='background:"+textcolor+"'></div>\
+        				<div class='color1 block' val='1'></div>\
           				<div class='color2 block' val='2'></div>\
          				<div class='color3 block' val='3'></div>\
           				<div class='color4 block' val='4'></div>\
@@ -348,63 +351,122 @@ $(document).ready(function(){
 			// make image dragable
 			$box.draggable();
 
+			// click ok btn
+			$box.find('.textDone').click(function(e){
+				$box.find('input.text').blur();
+			});
+
+			// press key enter
+			$box.find('input.text').bind('keyup',function(event) {  
+          		if(event.keyCode==13){  
+                	$box.find('input.text').blur();
+        		}  
+         	}); 
+
 			// replace the input element with p element 
 			$box.find('input.text').blur(blur)
-
 			function blur(e){
-
+				$box.find('.attr').fadeOut(150);
+				$box.css("height",70);
+				$box.find('.textDone').fadeOut(150);
 				e.stopPropagation();
 
 				var text = $(this).val();
-				var $p = $("<p class='text'>"+text+"<span class='deleteText'></span></p>");
+				var $p = $("<p class='text' >"+text+"</p>");
 				$(this).replaceWith($p);
-
+				resetStyle();
 				// click to show the input element
 				// enter edit mode
-				$p.click(function(e){
+				$p.dblclick(function(e){
 					e.stopPropagation();
+					
+					var $input = $("<input type='text' class='text' />");
+					$box.find('.attr').fadeIn(150);
+					$box.find('.textDone').fadeIn(150);
+					$box.css("height",135);
+					// use the text in the closure
+					$input.val(text);
+					$(this).replaceWith($input);
+					resetStyle();
+					$input.focus();
 
-					if( isAddText ){
-
-						var $input = $("<input type='text' class='text' />");
-						// use the text in the closure
-						$input.val(text);
-						$(this).replaceWith($input);
-						$input.focus();
-
-						$input.blur( blur );
-					} 
+					$input.blur( blur );
+					
 				})
 			}
 
+			// change font color
+			$box.find('.block.fontcolor .block').click(function(e){
+				var color = $(this).css("background-color");
 
+				var parts = color.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+				textcolor = "rgb("+parseInt(parts[1])+","+parseInt(parts[2])+","+parseInt(parts[3])+")";
+
+				resetStyle();
+			});
+
+			// change background color
+			$box.find('.block.background .block').click(function(e){
+				var color = $(this).css("background-color");
+
+				var parts = color.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+				for (var i = 0; i < 3; i++) {
+				    textbgcolor[i] = parseInt(parts[i+1]);
+				}
+
+				textbgA = generateRGBA(textbgcolor,textbgalpha);
+
+				textbg = generateRGB(textbgcolor);
+				resetStyle();
+			});
+
+			// change fontsie bg-alpha
 			setUpTangle();
-
 			function setUpTangle () {
 
 	            var tangle = new Tangle($box[0], {
 	                initialize: function () {
-	                    this.fontsize = 30;
-	                    this.bgalpha = 60;
+	                    this.fontsize = textsize;
+	                    this.bgalpha = textbgalpha;
 	                },
 	                update: function () {
-	                    $box.children('.text').css({
+	                    $box.find('.text').css({
 	                    		"font-size": this.fontsize,
-	                    		"background": "rgba(255,255,255,"+this.bgalpha/100.0+")"
+	                    		"background": "rgba("+textbgcolor[0]+","+textbgcolor[1]+","+textbgcolor[2]+","+this.bgalpha/100.0+")"
 	                    });
 	                    $box.find('.bg-alpha').css({
-	                    	"background": "rgba(255,255,255,"+this.bgalpha/100.0+")"
+	                    	"background": "rgba("+textbgcolor[0]+","+textbgcolor[1]+","+textbgcolor[2]+","+this.bgalpha/100.0+")"
 	                    });
 						$box.find('.fontsize').css({
-							"background": "rgba(255,255,255,"+this.bgalpha/100.0+")"
+							"background": "rgba("+textbgcolor[0]+","+textbgcolor[1]+","+textbgcolor[2]+","+this.bgalpha/100.0+")"
 						});
 	                }
 	            });
 	        }
+	        function resetStyle(){
+	        	$box.find('.text').css("color",textcolor);
+				$box.find('.block.fontsize').css("color",textcolor);
+				$box.find('.block.fontcolor .block.fontcolor').css("background",textcolor);
+				
+				$box.find('.text').css("font-size",textsize);
 
+				$box.find('.text').css("background",textbgA);
+				$box.find('.block .bgcolor.block').css("background",textbg);
+				$box.find('.block.bg-alpha').css("background",textbgA);
+				$box.find('.block .block.bg-alpha').css("color",textbg);
+				$box.find('.block.fontsize').css("background",textbgA);
+
+	        }
+	        
 			textId++;
 			return $box;
 		}
+		function generateRGBA(rgb,a){
+	        return "rgba("+rgb[0]+","+rgb[1]+","+rgb[2]+","+a/100.0+")";
+	    }
+	    function generateRGB(rgb){
+	    	return "rgb("+rgb[0]+","+rgb[1]+","+rgb[2]+")";
+	    }
 	})()
 
 	var isAddText = false;
@@ -417,7 +479,8 @@ $(document).ready(function(){
 		if(isAddText){
 			var $box = createTextBox(e.pageX,e.pageY);
 			$(this).append($box);
-			
+			$box.find('.text').focus();
+
 			toggleTextMode();
 		}
 	});
