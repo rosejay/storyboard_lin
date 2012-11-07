@@ -131,13 +131,7 @@ $(document).ready(function(){
 	function init(){
 		var width=window.innerWidth;
 		var height=window.innerHeight;
-		$('.left-panel').css("height",height);
-		$('.right-panel').css("height",height);
-		$('.toolbar').css("height",height);
-		$('.left-panel .material-list').css("height",height - 125);
-		$('.right-panel').css("width",width - 250 - 80);
-		
-		
+
 		var slidenum = 0;
 		var topDistance = 0;
 
@@ -236,15 +230,13 @@ $(document).ready(function(){
 
 		$('.closeLeftBtn').click(function(e){
 			if(isLeftShow == 1){// close left
-				$('.left-panel').animate({ left:-250 },150);
-				$('.right-panel').animate({ left:0 },150).animate({width: width},150);
-				$(this).animate({ left:15 },150).css("color", "#ccc");
+				$('.left-panel').css("width",0);
+				$(this).animate({ left:15 },150);
 				isLeftShow = 0;
 			}
 			else{// open left
-				$('.left-panel').animate({ left:0 },150);
-				$('.right-panel').animate({ left:250 },150).animate({width: width-250},150);
-				$(this).animate({ left:220 },150).css("color", "#ccc");
+				$('.left-panel').css("width",250);
+				$(this).animate({ left:220 },150);
 				isLeftShow = 1;
 			}
 		});
