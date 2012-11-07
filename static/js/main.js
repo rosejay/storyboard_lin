@@ -315,7 +315,6 @@ $(document).ready(function(){
 			var tempHeight = 135;
 			var winWidth = window.innerWidth;
 
-			console.log(x);
 			if(isLeftShow){
 				x -= 250;
 				winWidth -=250;
@@ -349,66 +348,94 @@ $(document).ready(function(){
           				<div class='color4 block' val='4'></div>\
           				<div class='color5 block' val='5'></div>\
         			</div>\
-     			</div></div>");		 
+     			</div></div>");
 
 			// make image dragable
 			$box.draggable();
+
+			// replace the input element with p element 
+			$box.find('input.text').blur(blur)
+
+			function blur(e){
+
+				e.stopPropagation();
+
+				var text = $(this).val();
+				var $p = $("<p class='text'>"+text+"<span class='deleteText'></span></p>");
+				$(this).replaceWith($p);
+
+				// click to show the input element
+				// enter edit mode
+				$p.click(function(e){
+					e.stopPropagation();
+
+					if( isAddText ){
+
+						var $input = $("<input type='text' class='text' />");
+						// use the text in the closure
+						$input.val(text);
+						$(this).replaceWith($input);
+						$input.focus();
+
+						$input.blur( blur );
+					} 
+				})
+			}
+
+
+			setUpTangle();
+
+			function setUpTangle () {
+
+	            var tangle = new Tangle($box[0], {
+	                initialize: function () {
+	                    this.fontsize = 30;
+	                    this.bgalpha = 60;
+	                },
+	                update: function () {
+	                    $box.children('.text').css({
+	                    		"font-size": this.fontsize,
+	                    		"background": "rgba(255,255,255,"+this.bgalpha/100.0+")"
+	                    });
+	                    $box.find('.bg-alpha').css({
+	                    	"background": "rgba(255,255,255,"+this.bgalpha/100.0+")"
+	                    });
+						$box.find('.fontsize').css({
+							"background": "rgba(255,255,255,"+this.bgalpha/100.0+")"
+						});
+	                }
+	            });
+	        }
 
 			textId++;
 			return $box;
 		}
 	})()
 
-	var isAddText = 0;
+	var isAddText = false;
 	$('.addText').click(function(e){
-		isAddText = 1;
-
-		$('#dropzone').click(function(e){
-			if(isAddText){
-				var $box = createTextBox(e.pageX,e.pageY);
-				$(this).append($box);
-
-				$('#dropzone .text').click(function(e){ 
-					alert("dd");
-					var text = $(this).val();
-					console.log(text);
-
-					$("<p class='text'>"+text+"<span class='deleteText'></span></p>").insertAfter('.text');
-					$(this).remove();
-				});
-
-
-				isAddText = 0;
-
-				setUpTangle();
-				function setUpTangle () {
-
-		            var element = $box;
-
-		            var tangle = new Tangle( {
-		                initialize: function () {
-		                    this.fontsize = 30;
-		                    this.bgalpha = 60;
-		                },
-		                update: function () {
-		                	alert("d");
-		                    $box.children('text').css("font-size", this.fontsize).css("background", "rgba(255,255,255,"+this.bgalpha/100.0+")");
-		                    $box.child().children('bg-alpha').css("background", "rgba(255,255,255,"+this.bgalpha/100.0+")");
-							$box.child().children('fontsize').css("background", "rgba(255,255,255,"+this.bgalpha/100.0+")");
-		                }
-		            });
-		        }
-			}
-				
-
-		});
-
+		toggleTextMode();
 	});
 
-	
+	$('#dropzone').click(function(e){
 
-	
-	
+		if(isAddText){
+			var $box = createTextBox(e.pageX,e.pageY);
+			$(this).append($box);
+			
+			toggleTextMode();
+		}
+	});
+
+	function toggleTextMode(){
+
+		isAddText = ! isAddText;
+		if(isAddText){
+			$('.addText').addClass('active');
+		}else{
+			$('.addText').removeClass('active');
+		}
+	}
 
 
 	

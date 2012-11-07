@@ -407,6 +407,11 @@ html{
 	background: url(../img/addtext.png);
 }
 
+.addText.active{
+	/*这边在激活文字模式的时候换一张别的背景图吧*/
+	box-shadow: 0px 0px 5px #10A4D3;
+}
+
 #dropzone{
 	position: relative;
 }
