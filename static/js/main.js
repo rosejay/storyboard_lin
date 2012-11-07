@@ -132,8 +132,11 @@ $(document).ready(function(){
 		var width=window.innerWidth;
 		var height=window.innerHeight;
 		$('.left-panel').css("height",height);
-		$('.left-panel .material-list').css("height",height-125);
-
+		$('.right-panel').css("height",height);
+		$('.toolbar').css("height",height);
+		$('.left-panel .material-list').css("height",height - 125);
+		$('.right-panel').css("width",width - 250 - 80);
+		
 		
 		var slidenum = 0;
 		var topDistance = 0;

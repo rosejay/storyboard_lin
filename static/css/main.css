@@ -53,19 +53,70 @@ div{display: block;}
 html{
 	background: url('../img/bg.png') repeat #E4E4E4;
 }
+body{
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+.box {
+  width: 100%;
+  height: 100%;
+  /* flexbox setup */
+  display: -webkit-box;
+  -webkit-box-orient: horizontal;
+  display: -moz-box;
+  -moz-box-orient: horizontal;
+  display: box;
+  box-orient: horizontal;
+}
+.box .left-panel, .box .right-panel, .box .toolbar {
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  box-flex: 1;
+
+  -moz-transition: width 0.5s ease-out;
+  -o-transition: width 0.5s ease-out;
+  -webkit-transition: width 0.5s ease-out;
+  transition: width 0.5s ease-out;
+}
+
 
 .right-panel{
-	width: 100%;
 	position: relative;
 }
 
+.toolbar{
+	position: relative;
+	width: 80px;
+	height: 100%;
+}
+.toolbar .toolbar-inner{
+	width: 60px;
+	height: 100%;
+	margin: 0 10px;
+	background: #fff;
+	-webkit-box-shadow: inset 0px 0px 7px #ccc;
+	-moz-box-shadow: inset 0px 0px 7px #ccc;
+	-o-box-shadow: inset 0px 0px 7px #ccc;
+	box-shadow: inset 0px 0px 7px #ccc;
+}
+.toolbar .toolbar-inner h5{
+	font-size: 12px;
+	color: #ddd;
+	text-align: center;
+	padding: 10px 0 5px 0;
+	border-bottom: 1px solid #f2f2f2;
+}
+.toolbar .toolbar-inner li{
+	border-bottom: 1px solid #f2f2f2;
+	height: 60px;
+}
+
 .left-panel{
-	position: absolute;
-	left: 0;
-	top: 0;
-	bottom: 0;
-	background: url(../img/left-shadow.png) #D9D9D9;
+	position: relative;
 	width: 250px;
+	height: 100%;
+	background: url(../img/left-shadow.png) #D9D9D9;
 	color: #666;
 }
 .left-panel p.material{
@@ -421,3 +472,6 @@ html{
 	-o-box-shadow: inset 0px 0px 15px #ccc;
 	box-shadow: inset 0px 0px 15px #ccc;
 }
+
+
+
