@@ -271,7 +271,7 @@ $(document).ready(function(){
 							<div class='deleteBtn'></div>\
 							<div class='text'>\
 								<span>Really?</span>\
-								<a click=''>Yes</a>\
+								<a click='' class='do_click'>Yes</a>\
 								<span>/</span>\
 								<a click=''>No</a>\
 							</div>\
@@ -281,7 +281,11 @@ $(document).ready(function(){
 							<div class='add addTop'></div>\
 							<div class='add addOpacity'></div>\
 							<div class='add addAll'></div>\
-						</div>");		    
+						</div>");
+
+			$box.find('.do_click').click(function(){
+				$box.remove();
+			})	    
 			// make image dragable
 			$box.draggable();
 
