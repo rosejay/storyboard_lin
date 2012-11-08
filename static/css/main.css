@@ -255,7 +255,12 @@ body{
 .timelineControl .add.addLeft{
 	background: url(../img/left.png) 0 -60px;
 }
-.timelineControl .add.addLeft:hover, .timelineControl .add.addTop:hover, .timelineControl .add.addOpacity:hover{
+.timelineControl .add.addLeft:hover, 
+.timelineControl .add.addTop:hover, 
+.timelineControl .add.addOpacity:hover,
+.timelineControl .add.addLeft.sel, 
+.timelineControl .add.addTop.sel, 
+.timelineControl .add.addOpacity.sel{
 	background-position: 0 0;
 }
 .timelineControl .add.addTop{
@@ -264,6 +269,9 @@ body{
 .timelineControl .add.addOpacity{
 	background: url(../img/opacity.png) 0 -60px;
 }
+
+
+
 .scaleControl{
 	background: url(../img/scale.png);
 	width: 60px;
@@ -572,18 +580,21 @@ body{
 }
 .control ul.progress li a{
 	float: left;
-	height: 10px;
+	height: 30px;
 	width: 100%;
 	display: block;
 }
-.control ul.progress li a.topAnimation{
-	background: #D71921; 
+.control ul.progress li a.topAnimation,
+.control ul.progress li:hover a.topAnimation em{
+	background: #D71921 !important; 
 }
-.control ul.progress li a.leftAnimation{
-	background: #00AEEF; 
+.control ul.progress li a.leftAnimation,
+.control ul.progress li:hover a.leftAnimation em{
+	background: #00AEEF !important; 
 }
-.control ul.progress li a.opacityAnimation{
-	background: #29AE6E; 
+.control ul.progress li a.opacityAnimation,
+.control ul.progress li:hover a.opacityAnimation em{
+	background: #29AE6E !important; 
 }
 
 .control ul.percent{
@@ -605,8 +616,32 @@ body{
 }
 
 
-
-
-
+.control ul.progress li a em{
+	display: block;
+    margin: 0;
+    height: 25px;
+    width: 11px;
+    overflow: hidden;
+    padding: 0;
+    float: left;
+    background: #ccc;
+    text-indent: -9000px;
+    font-size: 11px;
+    line-height: 20px;
+    color: #fff;
+}
+.control ul.progress li:hover a em,
+.control ul.progress li:hover a.sel em{
+    display: block;
+    margin: -20px 0 0 0;
+    height: 20px;
+    overflow: hidden;
+    padding: 0 25px 0 5px;
+    float:left;
+    width: auto;
+    background: #ccc;  
+    text-indent: 0;
+    white-space: nowrap;
+}
 
 

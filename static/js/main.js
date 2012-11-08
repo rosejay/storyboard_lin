@@ -110,30 +110,25 @@ $(document).ready(function(){
 			);
 
 			currentFolder = num;
+			$('.material-list li').each(function(){
+				var img = $(this).find('')
+				this.addEventListener('dragstart', function(e){
+					e.dataTransfer.setData('text/plain', JSON.stringify({
+						src : "materials/"+folders[currentFolder]+"/"+e.target.innerHTML
+					}))
+				  	this.style.opacity = '0.4';  // this / e.target is the source node.
+				}, false);
+			})
 		}
-
-		// add dragstart event;
-
-		$('.material-list li').each(function(){
-			var img = $(this).find('')
-			this.addEventListener('dragstart', function(e){
-				e.dataTransfer.setData('text/plain', JSON.stringify({
-					src : "materials/"+folders[currentFolder]+"/"+e.target.innerHTML
-				}))
-			  	this.style.opacity = '0.4';  // this / e.target is the source node.
-			}, false);
-		})
-
 	}) 
 	
 	init();
-		
+	
 	function init(){
 		var width=window.innerWidth;
 		var height=window.innerHeight;
 
 		var slidenum = 0;
-		var topDistance = 0;
 
 		addBigSlides();
 
@@ -185,7 +180,6 @@ $(document).ready(function(){
 					if(data){
 						data = JSON.parse(data);
 					}
-
 					var $box = createImageBox(data.src, e.pageX, e.pageY);
 
 					$('#dropzone').append($box);
@@ -199,21 +193,6 @@ $(document).ready(function(){
 						var $box = createImageBox(evt.target.result, e.pageX, e.pageY)
 						$('#dropzone').append( $box );
     
-						topDistance += curWidth*height/width;
-
-						// click image add scale btn
-						$box.click(function(e){
-							var img = $(this).children('img');
-							var x = $(this).attr("left");
-							var y = $(this).attr("top");
-
-					        var isScale = false;
-					        
-					        function setPosition(e){
-					        	img.css("width",(e.pageX - x));
-					        	img.css("height",(e.pageY - y));
-					        }
-					    });
 					};
 					reader.readAsDataURL(e.dataTransfer.files[0]);
 				}
@@ -282,10 +261,20 @@ $(document).ready(function(){
 							<div class='add addOpacity'></div>\
 							<div class='add addAll'></div>\
 						</div>");
-
+			// delete image
 			$box.find('.do_click').click(function(){
 				$box.remove();
-			})	    
+			});	    
+
+			// add left animation mode
+			$box.find('.addLeft').click(function(){
+
+				$(this).parents().children(".add").removeClass("sel");
+				$(this).addClass('sel');
+
+				var $box = createControlBox("left");
+				$('.right-panel').append($box);
+			});
 			// make image dragable
 			$box.draggable();
 
@@ -410,7 +399,8 @@ $(document).ready(function(){
 			// change font color
 			$box.find('.block.fontcolor .block').click(function(e){
 				var color = $(this).css("background-color");
-
+				$(this).parents().children(".block").removeClass("sel");
+				$(this).addClass("sel");
 				var parts = color.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
 				textcolor = "rgb("+parseInt(parts[1])+","+parseInt(parts[2])+","+parseInt(parts[3])+")";
 
@@ -420,7 +410,8 @@ $(document).ready(function(){
 			// change background color
 			$box.find('.block.background .block').click(function(e){
 				var color = $(this).css("background-color");
-
+				$(this).parents().children(".block").removeClass("sel");
+				$(this).addClass("sel");
 				var parts = color.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
 				for (var i = 0; i < 3; i++) {
 				    textbgcolor[i] = parseInt(parts[i+1]);
@@ -513,6 +504,68 @@ $(document).ready(function(){
 		
 	});
 
+	var createControlBox = (function(){
+
+		return function(type){
+			var controlWidth = 740;
+			var controlHeight = 60;
+
+			var width = $('.right-panel').css("width");
+			var height = $('.right-panel').css("height");
+
+
+			var left = (parseInt(width)-controlWidth)/2;
+			var top = parseInt(height)-controlHeight - 20;
+
+			$box = $("<div class='control' style='left:"+left+"px;top:"+top+"px'></div>");
+
+			var html = "";
+
+			html += 	"<p class='title'>PROGRESS</p>";
+			html += 	"<div class='bar'>";
+			html += 		"<ul class='progress'>";
+			
+	          
+	        for(var i = 0; i<=100; i+=2){
+	        	html += "<li title='"+i+"%'>";
+	        	//html += "<a title='left' class='leftAnimation'></a>";
+	        	//html += "<a title='top' class='topAnimation'></a>";
+	            //html += "<a title='opacity' class='opacityAnimation'><em>"+i+"</em></a>";
+	            html += "<em>"+i+"</em>";
+	            html += "</li>";
+	        }
+	        html += 		"</ul>";
+	        html += 		"<ul class='percent'>";
+
+	        for(i=0; i<=100; i+=10){
+	        	html += "<li>"+i+"</li>";
+	        }
+
+	        html += 		"</ul>";
+	        html += 	"</div>";
+
+	        $box.append(html);
+
+	        $box.find('.progress li em').click(function(){
+	        	
+	        	if (type = "top") {
+	        		var $a = $("<a title='top' class='topAnimation sel'><em>top:0px</em></a>");
+					$(this).replaceWith($a);
+	        	}
+	        	else if(type = "left") {
+	        		var $a = $("<a title='left' class='leftAnimation sel'><em>left:100px</em></a>");
+					$(this).replaceWith($a);
+	        	}
+	        	else{
+	        		var $a = $("<a title='opacity' class='opacityAnimation sel'><em>opacity:0</em></a>");
+					$(this).replaceWith($a);
+	        	}
+	        	$(this).remove();
+	        });
+
+			return $box;
+		}
+	})()
 
 	
 
