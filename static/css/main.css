@@ -37,18 +37,18 @@ div{display: block;}
   user-select: none;
 }
 
-.select-ctrl{width:220px;position:relative;margin:0 15px; }
-.select-ctrl .current-option{ position:relative;z-index:9;height:40px;background:url("../img/file.png") #eee no-repeat;padding-left:10px; cursor:pointer;box-shadow:0 0 5px rgba(0,0,0,.2);}
+.select-ctrl{width:200px;position:relative;margin:0; }
+.select-ctrl .current-option{ position:relative;z-index:9;height:40px;background:url("../img/file.png") #eee no-repeat;padding-left:10px; cursor:pointer;}
 
 .select-ctrl .current-option .select-txt{ cursor:pointer;position:relative; height:40px; line-height:40px;padding:0 35px 0 5px;}
 .select-ctrl .current-option .select-btn{ position:absolute;right:-2px;top:0;width:35px;height:40px; cursor:pointer;}
 .select-ctrl .current-option.selecting .select-btn{ background-position:0 -34px;}
 .select-ctrl .current-option input.show-text{cursor:pointer; padding:0; margin:0; position:absolute; top:0; font-weight: bold; left:30px; width:100%;height:40px; line-height:40px;border:none 0;background:none;font-size:14px;color:#666; }
 .select-ctrl .current-option input.post-input{display:none;}
-.select-ctrl .drop-wrap{display:none; position:absolute;z-index:8;width:218px;margin:-10px 0 0 1px;padding-top:10px;background:#eee;box-shadow:0 0 5px rgba(0,0,0,.2);}
-.select-ctrl .drop-wrap li{line-height:40px;height:40px; width:220px; cursor:pointer; border-bottom: 1px solid #e2e2e2;}
+.select-ctrl .drop-wrap{display:none; position:absolute;z-index:8;width:198px;margin:-10px 0 0 1px;padding-top:10px;background:#e2e2e2;box-shadow:0 0 5px rgba(0,0,0,.2);}
+.select-ctrl .drop-wrap li{line-height:40px;height:40px; width:200px; cursor:pointer; border-bottom: 1px solid #ddd;}
 .select-ctrl .drop-wrap li a{ padding:0 0 0 40px; display:block; width:180px; color:#999; text-decoration:none; }
-.select-ctrl .drop-wrap li a:hover{ color: #333; background: #e2e2e2; }
+.select-ctrl .drop-wrap li a:hover{ color: #333; background: #ddd; }
 
 html{
 	background: url('../img/bg.png') repeat #E4E4E4;
@@ -154,7 +154,7 @@ body{
 
 .left-panel{
 	position: relative;
-	width: 250px;
+	width: 200px;
 	height: 100%;
 	background: #fff;
 	color: #aaa;
@@ -169,7 +169,7 @@ body{
 	/*background: url(../img/material.png) no-repeat;*/
 	color: #ddd;
 	text-align: center;
-	width: 100%;
+	width: 200px;
 	padding: 10px 0 5px 0;
 	border-bottom: 1px solid #f2f2f2;
 }
@@ -181,7 +181,7 @@ body{
 .left-panel .material-list ul{
 	white-space: nowrap;
 	height: 100%;
-	width: 210px;
+	width: 160px;
 	margin: 5px 20px 0 20px;
 	overflow-x: hidden;
 	overflow-y: auto;
@@ -192,7 +192,7 @@ body{
 	cursor: pointer;
 	padding: 0 15px;
 	height: 33px;
-	width: 180px;
+	width: 140px;
 	border-bottom: 1px solid #f2f2f2;
 	line-height: 33px;
 	cursor: move;
@@ -206,14 +206,16 @@ body{
 .closeLeftBtn{
 	position: absolute;
 	z-index: 100;
-	top: 30px;
-	left: 220px;
-	width: 30px;
-	height: 30px;
+	top: 0;
+	bottom: 0;
+	left: 204px;
+	width: 16px;
+	padding: 25px 0 0 0;
 	color: #ddd;
 	font-size: 50px;
-	line-height: 30px;
+	line-height: 100%;
 	cursor: pointer;
+	background: rgba(255,255,255,0);
 }
 
 .img-box{
@@ -227,7 +229,8 @@ body{
 	box-shadow: 0 0 5px #aaa;
 }
 .img-box:hover .scaleControl,
-.img-box:hover .deletePic{
+.img-box:hover .deletePic,
+.img-box:hover .timelineControl{
 	opacity:1.0;
 
 	transition:all 0.5s;
@@ -235,7 +238,32 @@ body{
 	-webkit-transition:all 0.5s; /* Safari and Chrome */
 	-o-transition:all 0.5s; /* Opera */
 }
-
+.timelineControl{
+	opacity: 0;
+	position: absolute;
+	left: 10px;
+	bottom: 10px;
+	z-index: 100;
+}
+.timelineControl .add{
+	width: 60px;
+	height: 60px;
+	margin: 0 2px 0 0;
+	float: left;
+	cursor: pointer;
+}
+.timelineControl .add.addLeft{
+	background: url(../img/left.png) 0 -60px;
+}
+.timelineControl .add.addLeft:hover, .timelineControl .add.addTop:hover, .timelineControl .add.addOpacity:hover{
+	background-position: 0 0;
+}
+.timelineControl .add.addTop{
+	background: url(../img/top.png) 0 -60px;
+}
+.timelineControl .add.addOpacity{
+	background: url(../img/opacity.png) 0 -60px;
+}
 .scaleControl{
 	background: url(../img/scale.png);
 	width: 60px;
@@ -245,9 +273,10 @@ body{
 	bottom: 0;
 	cursor: se-resize;
 	opacity:0;
+
 }
 .deletePic{
-	z-index: 1000;
+	z-index: 100;
 	position: absolute;
 	right: 10px;
 	top: 10px;
@@ -303,11 +332,11 @@ body{
 	position: absolute;
 	height: 150px;
 	top: -75px;
-	left: 220px;
+	left: 180px;
 }
 #imgPreview .bd{
 	padding: 0;
-	background: rgba(0, 0, 0, 0.8);
+	background: rgba(255, 255, 255, 0.5);
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
 	border-radius: 4px;
@@ -315,16 +344,16 @@ body{
 	height: 158px;
 	margin: 0; 
 	padding: 0;
-	-moz-box-shadow: 0 0 5px #000;
-	-webkit-box-shadow: 0 0 5px #000;
-	box-shadow: 0 0 5px #000;
+	-moz-box-shadow: 0 0 5px #ccc;
+	-webkit-box-shadow: 0 0 5px #ccc;
+	box-shadow: 0 0 5px #ccc;
 }
 #imgPreview .x1{
 	position: absolute;
 	left: -8px;
 	top: 67px;
 	margin-left: 0;
-	border-color: transparent rgba(0, 0, 0, 0.8) transparent transparent;
+	border-color: transparent rgba(255, 255, 255, 0.5) transparent transparent;
 	border-style: dashed solid dashed dashed;
 	border-width: 8px 8px 8px 0;
 	font-size: 0;
@@ -335,7 +364,7 @@ body{
 }
 
 #imgPreview img{
-	border: 5px solid #000;
+	border: 5px solid #fff;
 	height: 150px;
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
@@ -509,6 +538,75 @@ body{
 	-o-box-shadow: inset 0px 0px 15px #ccc;
 	box-shadow: inset 0px 0px 15px #ccc;
 }
+
+.control{
+	position: absolute;
+	bottom: 30px;
+	left: 300px;
+	height: 60px;
+	width: 740px;
+	font-size: 12px;
+	color: #ccc;
+	z-index: 1000;
+}
+.control p.title{
+	float: left;
+	width: 70px;
+	padding: 35px 7px 0 0;
+	text-align: right;
+}
+.control .bar{
+	width: 660px;
+	float: left;
+}
+.control ul.progress{
+	float: left;
+}
+.control ul.progress li{
+	cursor: pointer;
+	float: left;
+	width: 11px;
+	background: #CCC;
+	height: 30px;
+	margin-right: 1px;
+}
+.control ul.progress li a{
+	float: left;
+	height: 10px;
+	width: 100%;
+	display: block;
+}
+.control ul.progress li a.topAnimation{
+	background: #D71921; 
+}
+.control ul.progress li a.leftAnimation{
+	background: #00AEEF; 
+}
+.control ul.progress li a.opacityAnimation{
+	background: #29AE6E; 
+}
+
+.control ul.percent{
+	float: left;
+	margin:5px 0 0 0;
+	
+}
+
+.control ul.percent li{
+	color: #aaa;
+	float: left;
+	border-left: 2px solid #ddd;
+	border-top: 1px solid #ccc;
+	padding: 0 0 0 4px;
+	width: 54px;
+}
+.control ul.percent li:last-child{
+	border-top: 0;
+}
+
+
+
+
 
 
 

@@ -228,12 +228,12 @@ $(document).ready(function(){
 		$('.closeLeftBtn').click(function(e){
 			if(isLeftShow == 1){// close left
 				$('.left-panel').css("width",0);
-				$(this).animate({ left:15 },150);
+				$(this).animate({ left:4 },150);
 				isLeftShow = 0;
 			}
 			else{// open left
-				$('.left-panel').css("width",250);
-				$(this).animate({ left:220 },150);
+				$('.left-panel').css("width",200);
+				$(this).animate({ left:204 },150);
 				isLeftShow = 1;
 			}
 		});
@@ -273,6 +273,12 @@ $(document).ready(function(){
 								<span>/</span>\
 								<a click=''>No</a>\
 							</div>\
+						</div>\
+						<div class='timelineControl'>\
+							<div class='add addLeft'></div>\
+							<div class='add addTop'></div>\
+							<div class='add addOpacity'></div>\
+							<div class='add addAll'></div>\
 						</div>");		    
 			// make image dragable
 			$box.draggable();
