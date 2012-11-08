@@ -560,7 +560,9 @@ body{
 .control p.title{
 	float: left;
 	width: 70px;
-	padding: 35px 7px 0 0;
+	margin: 25px 7px 0 0;
+	border-top: 5px solid black;
+	line-height: 25px;
 	text-align: right;
 }
 .control .bar{
@@ -616,7 +618,8 @@ body{
 }
 
 
-.control ul.progress li a em{
+.control ul.progress li a em,
+.control ul.progress li em{
 	display: block;
     margin: 0;
     height: 25px;
@@ -631,6 +634,7 @@ body{
     color: #fff;
 }
 .control ul.progress li:hover a em,
+.control ul.progress li:hover em,
 .control ul.progress li:hover a.sel em{
     display: block;
     margin: -20px 0 0 0;

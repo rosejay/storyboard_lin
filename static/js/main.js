@@ -512,7 +512,9 @@ $(document).ready(function(){
 
 			var width = $('.right-panel').css("width");
 			var height = $('.right-panel').css("height");
-
+			var colorTop = "#D71921";
+			var colorLeft = "#00AEEF";
+			var colorOpacity = "#29AE6E";
 
 			var left = (parseInt(width)-controlWidth)/2;
 			var top = parseInt(height)-controlHeight - 20;
@@ -520,13 +522,21 @@ $(document).ready(function(){
 			$box = $("<div class='control' style='left:"+left+"px;top:"+top+"px'></div>");
 
 			var html = "";
-
-			html += 	"<p class='title'>PROGRESS</p>";
+			if (type == "top") {
+				html += "<p class='title' style='border-top:5px solid "+colorTop+";'>PROGRESS</p>";
+			}
+			else if(type == "left"){
+				html += "<p class='title' style='border-top:5px solid "+colorLeft+";'>PROGRESS</p>";
+			}
+			else{
+				html += "<p class='title' style='border-top:5px solid "+colorOpacity+";'>PROGRESS</p>";
+			}
+			
 			html += 	"<div class='bar'>";
 			html += 		"<ul class='progress'>";
 			
 	          
-	        for(var i = 0; i<=100; i+=2){
+	        for(var i = 0; i<100; i+=2){
 	        	html += "<li title='"+i+"%'>";
 	        	//html += "<a title='left' class='leftAnimation'></a>";
 	        	//html += "<a title='top' class='topAnimation'></a>";
@@ -546,21 +556,18 @@ $(document).ready(function(){
 
 	        $box.append(html);
 
-	        $box.find('.progress li em').click(function(){
+	        $box.find('.progress li').click(function(){
 	        	
-	        	if (type = "top") {
+	        	if (type == "top") {
 	        		var $a = $("<a title='top' class='topAnimation sel'><em>top:0px</em></a>");
-					$(this).replaceWith($a);
 	        	}
-	        	else if(type = "left") {
+	        	else if(type == "left") {
 	        		var $a = $("<a title='left' class='leftAnimation sel'><em>left:100px</em></a>");
-					$(this).replaceWith($a);
 	        	}
 	        	else{
 	        		var $a = $("<a title='opacity' class='opacityAnimation sel'><em>opacity:0</em></a>");
-					$(this).replaceWith($a);
 	        	}
-	        	$(this).remove();
+	        	$(this).html($a);
 	        });
 
 			return $box;
