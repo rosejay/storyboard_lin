@@ -272,7 +272,7 @@ $(document).ready(function(){
 			$box.find('.timelineControl div').click(function(){
 				$('.control').remove();
 
-				var currentID = $box.find('img').id;
+				var currentID = $box.find('img').attr('id');
 				var currentType = 0;
 				
 				$(this).parents().css("opacity",1);
@@ -281,13 +281,14 @@ $(document).ready(function(){
 				var curX = parseInt($(this).parents().parents().css("left"));
 				var curY = parseInt($(this).parents().parents().css("top")) + img.height;
 				console.log($(this).parents().parents().css("left"),$(this).parents().parents().css("top"));
-				if ($(this).hasClass("addLeft")) {
-					currentType = 2;
-					var $box2 = createControlBox("left",curX,curY);
-				}
-				else if($(this).hasClass("addTop")){
+				
+				if($(this).hasClass("addTop")){
 					currentType = 1;
 					var $box2 = createControlBox("top",curX,curY);
+				}
+				else if ($(this).hasClass("addLeft")) {
+					currentType = 2;
+					var $box2 = createControlBox("left",curX,curY);
 				}
 				else{
 					currentType = 0;
@@ -295,6 +296,27 @@ $(document).ready(function(){
 				}
 				
 				$('#dropzone').append($box2);
+
+				$box2.find('span').click(function(){
+					progressInfo.push({
+						id : currentID,
+						type : currentType,
+						progress : $(this).parents().parents().attr('title'),
+						value : $(this).html()
+					});
+					if (currentType == 1) {
+		        		var $a = $("<div title='top' class='topAnimation sel'><p>top:"+$(this).html()+"</p></div>");
+		        	}
+		        	else if(currentType == 2) {
+		        		var $a = $("<div title='left' class='leftAnimation sel'><p>left:"+$(this).html()+"</p></div>");
+		        	}
+		        	else{
+		        		var $a = $("<div title='opacity' class='opacityAnimation sel'><p>opacity:"+$(this).html()+"</p></div>");
+		        	}
+
+		        	$(this).parents().parents().html($a);
+				});
+
 			});
 			// make image dragable
 			$box.draggable();
@@ -563,13 +585,13 @@ $(document).ready(function(){
 	        	//html += "<a title='top' class='topAnimation'></a>";
 	            //html += "<a title='opacity' class='opacityAnimation'><p>"+i+"</p></a>";
 	            if(type == "top"){
-
+	            	html += "<p>top:<span>0%</span> <span>100%</span></p>";
 	            }
 	            else if(type == "left"){
 	            	html += "<p>left:<span>-100%</span> <span>0</span> <span>100%</span></p>";
 	            }
 	            else{
-
+	            	html += "<p>opacity:<span>0%</span> <span>100%</span></p>";
 	            }
 	            
 	            html += "</li>";
@@ -586,19 +608,6 @@ $(document).ready(function(){
 
 	        $box.append(html);
 
-	        $box.find('.progress li').click(function(){
-	        	
-	        	if (type == "top") {
-	        		var $a = $("<a title='top' class='topAnimation sel'><p>top:0px</p></a>");
-	        	}
-	        	else if(type == "left") {
-	        		var $a = $("<a title='left' class='leftAnimation sel'><p>left:100px</p></a>");
-	        	}
-	        	else{
-	        		var $a = $("<a title='opacity' class='opacityAnimation sel'><p>opacity:0</p></a>");
-	        	}
-	        	$(this).html($a);
-	        });
 
 			return $box;
 		}

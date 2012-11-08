@@ -580,25 +580,25 @@ body{
 	height: 30px;
 	margin-right: 1px;
 }
-.control ul.progress li a{
+.control ul.progress li div{
 	float: left;
 	height: 30px;
 	width: 100%;
 	display: block;
 }
-.control ul.progress li a.topAnimation,
-.control ul.progress li:hover a.topAnimation p,
-.control ul.progress li a.topAnimation.sel p{
+.control ul.progress li div.topAnimation,
+.control ul.progress li:hover div.topAnimation p,
+.control ul.progress li div.topAnimation.sel p{
 	background: #D71921 !important; 
 }
-.control ul.progress li a.leftAnimation,
-.control ul.progress li:hover a.leftAnimation p,
-.control ul.progress li a.leftAnimation.sel p{
+.control ul.progress li div.leftAnimation,
+.control ul.progress li:hover div.leftAnimation p,
+.control ul.progress li div.leftAnimation.sel p{
 	background: #00AEEF !important; 
 }
-.control ul.progress li a.opacityAnimation,
-.control ul.progress li:hover a.opacityAnimation p，
-.control ul.progress li a.opacityAnimation.sel p{
+.control ul.progress li div.opacityAnimation,
+.control ul.progress li:hover div.opacityAnimation p,
+.control ul.progress li div.opacityAnimation.sel p{
 	background: #29AE6E !important; 
 }
 
@@ -621,7 +621,7 @@ body{
 }
 
 
-.control ul.progress li a p,
+.control ul.progress li div p,
 .control ul.progress li p{
 	display: block;
     margin: 0;
@@ -636,20 +636,20 @@ body{
     line-height: 20px;
     color: #fff;
 }
-.control ul.progress li a p span{
-	float: left;
+.control ul.progress li p span{
+
 	height: 20px;
 	margin: 0 0 0 10px;
 	cursor: pointer;
 }
-.control ul.progress li a p span:hover{
+.control ul.progress li p span:hover{
 	text-decoration: underline;
 	font-weight: bold;
 }
 
-.control ul.progress li:hover a p,
+.control ul.progress li:hover div p,
 .control ul.progress li:hover p,
-.control ul.progress li a.sel p{
+.control ul.progress li div.sel p{
     display: block;
     margin: -20px 0 0 0;
     height: 20px;
