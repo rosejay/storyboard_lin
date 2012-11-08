@@ -251,18 +251,20 @@ $(document).ready(function(){
 			img.onload = function(){
 				$(img).attr('width', img.width+'px');
 				$(img).attr('height', img.height+'px');
+
 				$(img).resizable();
+
+				$box.css({
+					left : (x-img.width/2)+'px',
+					top : (y-img.height/2) + 'px'
+				})
 			}
 			img.src= src;
 
 			if (isLeftShow)
 				x -= 250;
 
-			x = x-img.width/2;
-
-			y = y-img.height/2;
-
-			var $box = $("<div id='imgBox"+imageId+"' style='position:absolute;left:"+x+"px;top:"+y+"px' class='img-box'></div>");
+			var $box = $("<div id='imgBox"+imageId+"' style='position:absolute;' class='img-box'></div>");
 			$box.append(img);
 			$box.append("<div class='scaleControl'></div>\
 						<div class='deletePic'>\
