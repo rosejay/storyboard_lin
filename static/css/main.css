@@ -587,15 +587,18 @@ body{
 	display: block;
 }
 .control ul.progress li a.topAnimation,
-.control ul.progress li:hover a.topAnimation em{
+.control ul.progress li:hover a.topAnimation em,
+.control ul.progress li a.topAnimation.sel em{
 	background: #D71921 !important; 
 }
 .control ul.progress li a.leftAnimation,
-.control ul.progress li:hover a.leftAnimation em{
+.control ul.progress li:hover a.leftAnimation em,
+.control ul.progress li a.leftAnimation.sel em{
 	background: #00AEEF !important; 
 }
 .control ul.progress li a.opacityAnimation,
-.control ul.progress li:hover a.opacityAnimation em{
+.control ul.progress li:hover a.opacityAnimation em，
+.control ul.progress li a.opacityAnimation.sel em{
 	background: #29AE6E !important; 
 }
 
@@ -635,12 +638,12 @@ body{
 }
 .control ul.progress li:hover a em,
 .control ul.progress li:hover em,
-.control ul.progress li:hover a.sel em{
+.control ul.progress li a.sel em{
     display: block;
     margin: -20px 0 0 0;
     height: 20px;
     overflow: hidden;
-    padding: 0 25px 0 5px;
+    padding: 0 15px 0 5px;
     float:left;
     width: auto;
     background: #ccc;  

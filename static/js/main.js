@@ -267,13 +267,22 @@ $(document).ready(function(){
 			});	    
 
 			// add left animation mode
-			$box.find('.addLeft').click(function(){
-
+			$box.find('.timelineControl div').click(function(){
+				$('.control').remove();
+				$(this).parents().css("opacity",1);
 				$(this).parents().children(".add").removeClass("sel");
 				$(this).addClass('sel');
-
-				var $box = createControlBox("left");
-				$('.right-panel').append($box);
+				if ($(this).hasClass("addLeft")) {
+					var $box = createControlBox("left",x-img.width/2,y+img.height/2);
+				}
+				else if($(this).hasClass("addTop")){
+					var $box = createControlBox("top",x-img.width/2,y+img.height/2);
+				}
+				else{
+					var $box = createControlBox("opacity",x-img.width/2,y+img.height/2);
+				}
+				
+				$('#dropzone').append($box);
 			});
 			// make image dragable
 			$box.draggable();
@@ -506,7 +515,7 @@ $(document).ready(function(){
 
 	var createControlBox = (function(){
 
-		return function(type){
+		return function(type,x,y){
 			var controlWidth = 740;
 			var controlHeight = 60;
 
@@ -519,7 +528,7 @@ $(document).ready(function(){
 			var left = (parseInt(width)-controlWidth)/2;
 			var top = parseInt(height)-controlHeight - 20;
 
-			$box = $("<div class='control' style='left:"+left+"px;top:"+top+"px'></div>");
+			$box = $("<div class='control' style='left:"+(x-80)+"px;top:"+(y+20)+"px'></div>");
 
 			var html = "";
 			if (type == "top") {
@@ -541,7 +550,7 @@ $(document).ready(function(){
 	        	//html += "<a title='left' class='leftAnimation'></a>";
 	        	//html += "<a title='top' class='topAnimation'></a>";
 	            //html += "<a title='opacity' class='opacityAnimation'><em>"+i+"</em></a>";
-	            html += "<em>"+i+"</em>";
+	            html += "<em>"+i+"%</em>";
 	            html += "</li>";
 	        }
 	        html += 		"</ul>";
