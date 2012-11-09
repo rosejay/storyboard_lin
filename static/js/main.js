@@ -811,7 +811,14 @@ $(document).ready(function(){
 
 		jarallax = new Jarallax();
 		
+		// sort by id
+		progressInfo.sort(
+			function(a,b){
+				return a.id-b.id
+		});
+
 		// sort by type
+		/*
 		progressInfo.sort(
 			function(a,b){
 				return a.type-b.type
@@ -852,6 +859,39 @@ $(document).ready(function(){
 				[{progress: progressInfo[i].progress, opacity: progressInfo[i].value}, 
 				 {progress: progressInfo[i+1].progress, opacity: progressInfo[i+1].value}]
 			);
+*/
+		var progressId = "";
+		var progressArray = [];
+		for (var i = 0; i < progressInfo.length; i++) {
+			if(progressId != progressInfo[i].id && progressId != ""){
+				jarallax.addAnimation("#"+progressInfo[i].id,progressArray);
+
+				progressArray = new Array();
+				progressId = progressInfo[i].id;
+			}
+			if (progressInfo[i].type == 1) {
+				progressArray.push({
+							progress : progressInfo[i].progress,
+							top : progressInfo[i].value
+						});
+			}
+			else if(progressInfo[i].type == 2){
+				progressArray.push({
+							progress : progressInfo[i].progress,
+							left: progressInfo[i].value
+						});
+			}
+			else if(progressInfo[i].type == 3){
+				progressArray.push({
+							progress : progressInfo[i].progress,
+							opacity: progressInfo[i].value
+						});
+			}	
+			
+				
+		};
+
+
 
 		jarallax.setProgress(0.5);
 	}
