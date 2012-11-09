@@ -10,6 +10,7 @@ $(document).ready(function(){
 	var isProgressMode = false; // toggle to enter setting of animation mode
 	var isEditMode = false; // toggle to enter text edit mode
 	var progressInfo = []; // animation info array
+	var deleteObject;
 
 	/**
 	 * toggle to show left window
@@ -281,6 +282,18 @@ $(document).ready(function(){
 
 					toggleTextMode();
 				}
+				if(isProgressMode){
+					isProgressMode = !isProgressMode;
+					exitProgressMode();
+				}
+			});
+
+			$('#dropzone').dblclick(function(e){
+				e.stopPropagation();
+				var $box = createTextBox(e.pageX,e.pageY);
+				$(this).append($box);
+				$box.find('.text').focus();
+				//toggleTextMode();
 			});
 
 		}
@@ -345,6 +358,7 @@ $(document).ready(function(){
 			 * delete an image
 			 */
 			$box.find('.do_click').click(function(){
+				deleteObject = $box;
 				$box.remove();
 			});	    
 
@@ -358,7 +372,8 @@ $(document).ready(function(){
 	        });
 
 			// setting of animation mode
-			$box.find('.timelineControl div').click(function(){
+			$box.find('.timelineControl div').click(function(e){
+				e.stopPropagation();
 				timelineListener($(this));
 			});
 
@@ -374,6 +389,8 @@ $(document).ready(function(){
 	 * class of textBox
 	 */
 	var createTextBox = (function(){
+		
+		// init font style variables
 		var textId = 0;
 		var color1 = (60,204,255);
 		var color2 = (151,223,249);
@@ -392,9 +409,9 @@ $(document).ready(function(){
 		textbgA = generateRGBA(textbgcolor, textbgalpha);
 		textbg = generateRGB(textbgcolor);
 
-		
-
 		return function(x,y){
+
+			// init variables
 			var tempWidth = 540;
 			var tempHeight = 135;
 			var winWidth = window.innerWidth;
@@ -404,12 +421,14 @@ $(document).ready(function(){
 				winWidth -=250;
 			}
 
+			// calculate for x, y box position
 			if((x+tempWidth)>window.innerWidth)
 				x = winWidth - tempWidth;
 
 			if((y+tempHeight)>window.innerHeight)
 				y = window.innerHeight - tempHeight;
 
+			// html template for text box
 			var $box = $("<div class='text-editor' style='left:"+x+"px;top:"+y+"px;position:absolute' id='text-editor"+textId+"'>");
 
 			$box.append("<div class='textArea'>\
@@ -443,16 +462,23 @@ $(document).ready(function(){
         			</div>\
      			</div></div>");
 
-			// make image dragable
+			/**
+			 * make text box dragable
+			 */
 			$box.draggable({
 	            start: function() {
 	                exitProgressMode();
 	            }
 	        });
 
+			/**
+			 * hover on box to show buttons
+			 */
 			$box.hover(
 				function(){
 					if(!isEditMode){
+						$box.find('.timelineControl').css('opacity',1).css('display','none');
+
 						setNotEditMode();
 					}
 				},
@@ -461,24 +487,32 @@ $(document).ready(function(){
 				}
 			);
 			
-			// click delete btn
+			/**
+			 * delete a text box
+			 */
 			$box.find('.textDelete').click(function(e){
 				$box.remove();
 			});
 
-			// click ok btn
+			/**
+			 * click ok button equals to the focus of textinput blured
+			 */
 			$box.find('.textDone').click(function(e){
 				$box.find('input.text').blur();
 			});
 
-			// press key enter
+			/**
+			 * press key enter equals to the focus of textinput blured 
+			 */ 
 			$box.find('input.text').bind('keyup',function(event) {  
           		if(event.keyCode==13){  
                 	$box.find('input.text').blur();
         		}  
          	}); 
 
-			// replace the input element with p element 
+			/**
+			 * the focus of textinput blur, replace the input element with p element
+			 */ 
 			$box.find('input.text').blur(blur)
 			function blur(e){
 				isEditMode = false;
@@ -523,7 +557,9 @@ $(document).ready(function(){
 				}
 			}
 
-			// change font color
+			/**
+			 * change font color
+			 */
 			$box.find('.block.fontcolor .block').click(function(e){
 				var color = $(this).css("background-color");
 				$(this).parent().children(".block").removeClass("sel");
@@ -534,7 +570,9 @@ $(document).ready(function(){
 				resetStyle();
 			});
 
-			// change background color
+			/**
+			 * change background color
+			 */
 			$box.find('.block.background .block').click(function(e){
 				var color = $(this).css("background-color");
 				$(this).parent().children(".block").removeClass("sel");
@@ -547,8 +585,11 @@ $(document).ready(function(){
 				resetStyle();
 			});
 
-			// change fontsie bg-alpha
+			
 			setUpTangle();
+			/**
+			 * use tangle to change fontsize and bg-alpha
+			 */
 			function setUpTangle () {
 
 	            var tangle = new Tangle($box[0], {
@@ -574,6 +615,10 @@ $(document).ready(function(){
 	                }
 	            });
 	        }
+
+	        /**
+			 * update font styles
+			 */
 	        function resetStyle(){
 	        	textbg = generateRGB(textbgcolor);
 	        	textbgA = generateRGBA(textbgcolor,textbgalpha);
@@ -587,21 +632,32 @@ $(document).ready(function(){
 				$box.find('.text').css("background",textbgA);
 				$box.find('.block .bgcolor.block').css("background",textbg);
 				$box.find('.block.bg-alpha').css("background",textbgA);
-				$box.find('.block .block.bg-alpha').css("color",textbg);
+				$box.find('.block.bg-alpha p').css("color",textbg);
+				$box.find('.block.bg-alpha p span').css("color",textbg);
 				$box.find('.block.fontsize').css("background",textbgA);
 
 	        }
+
+	        /**
+			 * enter edit mode
+			 */
 	        function setEditMode(){
-				$('.textDelete').css('display','none').fadeOut(150);
+				$box.find('.textDelete').css('display','none').fadeOut(150);
 				$box.find('.timelineControl').css('opacity',0).fadeOut(150);
 			}
+			/**
+			 * exit edit mode
+			 */
 			function setNotEditMode(){
-				$('.textDelete').fadeIn(150);
+				$box.find('.textDelete').fadeIn(150);
 				$box.find('.timelineControl').css('opacity',1).fadeIn(150);
 			}
 
-			// setting of animation mode
-			$box.find('.timelineControl div').click(function(){
+			/**
+			 * set animation mode
+			 */
+			$box.find('.timelineControl div').click(function(e){
+				e.stopPropagation();
 				timelineListener($(this));
 			});
 
@@ -609,9 +665,16 @@ $(document).ready(function(){
 			isEditMode = true;
 			return $box;
 		}
+
+		/**
+		 * generate colors with alpha chanel
+		 */
 		function generateRGBA(rgb,a){
 	        return "rgba("+rgb[0]+","+rgb[1]+","+rgb[2]+","+a/100.0+")";
 	    }
+	    /**
+		 * generate colors without alpha chanel
+		 */
 	    function generateRGB(rgb){
 	    	return "rgb("+rgb[0]+","+rgb[1]+","+rgb[2]+")";
 	    }
@@ -643,12 +706,14 @@ $(document).ready(function(){
 			}
 			
 			html += 	"<div class='bar'>";
+			
 			// progress ul
 			html += 		"<ul class='progress'>";
 	        for(var i = 0; i<100; i+=2){
 	        	html += 		"<li title='"+i+"%'></li>";
 	        }
 	        html += 		"</ul>";
+	        
 	        // percent ul
 	        html += 		"<ul class='percent'>";
 	        for(i=0; i<=100; i+=10){
@@ -663,7 +728,9 @@ $(document).ready(function(){
 		}
 	})()
 	
-
+	/**
+	 * progress bar
+	 */
 	function timelineListener(item){
 		$this = item;
 		$box = $this.parent().parent();
@@ -718,13 +785,13 @@ $(document).ready(function(){
 				for(var i=0; i<progressInfo.length; i++){
 					if(progressInfo[i].id == currentID){
 						if (progressInfo[i].type == 1){
-							$div = $("<div title='top' class='topAnimation sel'><p>top:"+progressInfo[i].value+"</p></div>");
+							$div = $("<div title='top' class='topAnimation sel'><p>V:"+progressInfo[i].value+"</p></div>");
 						} 
 						else if (progressInfo[i].type == 2){
-							$div = $("<div title='left' class='leftAnimation sel'><p>left:"+progressInfo[i].value+"</p></div>");
+							$div = $("<div title='left' class='leftAnimation sel'><p>H:"+progressInfo[i].value+"</p></div>");
 						}
 						else if (progressInfo[i].type == 3){
-							$div = $("<div title='opacity' class='opacityAnimation sel'><p>opacity:"+progressInfo[i].value+"</p></div>");
+							$div = $("<div title='opacity' class='opacityAnimation sel'><p>A:"+progressInfo[i].value+"</p></div>");
 						}
 
 						var n = parseInt(progressInfo[i].progress)/2+1;
@@ -733,34 +800,44 @@ $(document).ready(function(){
 				}
 				for(var i = 0; i<50; i++){
 					if (currentType == 1){
-						$p = $("<p><span>-100%</span> <span>0%</span> <span>100%</span>(top)</p>");
+						$p = $("<p><span>bottom</span> <span>center</span> <span>top</span>(vertical)</p>");
 					} 
 					else if (currentType == 2){
-						$p = $("<p><span>-100%</span> <span>0</span> <span>100%</span>(left)</p>");
+						$p = $("<p><span>left</span> <span>center</span> <span>right</span>(horizontal)</p>");
 					}
 					else if (currentType == 3){
-						$p = $("<p><span>0</span> <span>1</span>(opacity)</p>");
+						$p = $("<p><span>0</span> <span>1</span>(alpha)</p>");
 					}
 					$box2.find('.progress li:nth-child('+(i+1)+')').append($p);
 				}
 			}
 
 			// set data 
-			$box2.find('span').click(function(){
+			$box2.find('span').click(function(e){
+				e.stopPropagation();
+
+				var curvalue = $this.html();
+				if(curvalue.indexOf("left") == -1 || curvalue.indexOf("top") == -1)
+					curvalue = "-100%";
+				else if(curvalue.indexOf("right") == -1 || curvalue.indexOf("bottom") == -1)
+					curvalue = "100%";
+				else if(curvalue.indexOf("center") == -1)
+					curvalue = "0%";
+
 				progressInfo.push({
 					id : currentID,
 					type : currentType,
 					progress : $this.parent().parent().attr('title'),
-					value : $this.html()
+					value : curvalue
 				});
 				if (currentType == 1) {
-	        		var $a = $("<div title='top' class='topAnimation sel'><p>top:"+$(this).html()+"</p></div>");
+	        		var $a = $("<div title='top' class='topAnimation sel'><p>V:"+$(this).html()+"</p></div>");
 	        	}
 	        	else if(currentType == 2) {
-	        		var $a = $("<div title='left' class='leftAnimation sel'><p>left:"+$(this).html()+"</p></div>");
+	        		var $a = $("<div title='left' class='leftAnimation sel'><p>H:"+$(this).html()+"</p></div>");
 	        	}
 	        	else if(currentType == 3){
-	        		var $a = $("<div title='opacity' class='opacityAnimation sel'><p>opacity:"+$(this).html()+"</p></div>");
+	        		var $a = $("<div title='opacity' class='opacityAnimation sel'><p>O:"+$(this).html()+"</p></div>");
 	        	}
 
 	        	$(this).parent().parent().append($a);
@@ -774,7 +851,6 @@ $(document).ready(function(){
 
 	var isPlay = false;
 	var jarallax;
-
 	var interval;
 
 	$('.play').click(function(e){
