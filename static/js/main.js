@@ -282,7 +282,7 @@ $(document).ready(function(){
 				else{
 
 					$('.control').remove();
-					var currentID = $box.find('img').attr('id');
+					var currentID = $box.attr('id');
 					var currentType = 0;
 					
 					$(this).parent().css("opacity",1);
@@ -333,7 +333,7 @@ $(document).ready(function(){
 								$p = $("<p><span>-100%</span> <span>0</span> <span>100%</span>(left)</p>");
 							}
 							else if (currentType == 3){
-								$p = $("<p><span>0%</span> <span>100%</span>(opacity)</p>");
+								$p = $("<p><span>0</span> <span>1</span>(opacity)</p>");
 							}
 							$box2.find('.progress li:nth-child('+(i+1)+')').append($p);
 						}
@@ -660,7 +660,7 @@ $(document).ready(function(){
 								$p = $("<p><span>-100%</span> <span>0</span> <span>100%</span>(left)</p>");
 							}
 							else if (currentType == 3){
-								$p = $("<p><span>0%</span> <span>100%</span>(opacity)</p>");
+								$p = $("<p><span>0</span> <span>1.0</span>(opacity)</p>");
 							}
 							$box2.find('.progress li:nth-child('+(i+1)+')').append($p);
 						}
@@ -788,12 +788,19 @@ $(document).ready(function(){
 
 	var isPlay = false;
 	var jarallax;
+
+	var interval;
+
 	$('.play').click(function(e){
 
 		togglePlayMode();
 		if (isPlay){
 			exitSetProgressMode();
 			initAnimation();
+
+			play(2, 50);
+		}else{
+			clearInterval(interval);
 		}
 	});
 
@@ -803,97 +810,77 @@ $(document).ready(function(){
 			$('.play').addClass('active');
 		}else{
 			$('.play').removeClass('active');
-			jarallax = new Jarallax();
 		}
+	}
+
+	function play(time, fps){
+		
+		var step = 1/(time*fps);
+		var progress = 0;
+		interval = setInterval(function(){
+
+			jarallax.setProgress(progress);
+			progress += step;
+			if(progress >= 1){
+				clearInterval(interval);
+				togglePlayMode();
+			}
+		}, 1000/fps);
 	}
 
 	function initAnimation(){
 
 		jarallax = new Jarallax();
 		
-		// sort by id
-		progressInfo.sort(
-			function(a,b){
-				return a.id-b.id
-		});
-
-		// sort by type
-		/*
-		progressInfo.sort(
-			function(a,b){
-				return a.type-b.type
-		});
-
-		// sort by progress
-		var num = new Array();
-		num[0] = num[1] = num[2] = 0;
-		progressInfo.sort(
-			function(a,b){
-				if (a.type == b.type == 1){
-					num[0] ++;
-				}
-				else if (a.type == b.type == 2){
-					num[1] ++;
-				}
-				else if (a.type == b.type == 3){
-					num[2] ++;
-				}
-				return a.progress-b.progress
-		});
-
-		// generate
-		for(var i = 0; i<num[0]-1; i++)
-			jarallax.addAnimation("#"+progressInfo[i].id,
-				[{progress: progressInfo[i].progress, top: progressInfo[i].value}, 
-				 {progress: progressInfo[i+1].progress, top: progressInfo[i+1].value}]
-			);
-		
-		for(i = num[0]; i<num[0]+num[1]-1; i++)
-			jarallax.addAnimation("#"+progressInfo[i].id,
-				[{progress: progressInfo[i].progress, left: progressInfo[i].value}, 
-				 {progress: progressInfo[i+1].progress, left: progressInfo[i+1].value}]
-			);
-		
-		for(i = num[0]+num[1]; i<num[0]+num[1]+num[2]-1; i++)
-			jarallax.addAnimation("#"+progressInfo[i].id,
-				[{progress: progressInfo[i].progress, opacity: progressInfo[i].value}, 
-				 {progress: progressInfo[i+1].progress, opacity: progressInfo[i+1].value}]
-			);
-*/
-		var progressId = "";
-		var progressArray = [];
-		for (var i = 0; i < progressInfo.length; i++) {
-			if(progressId != progressInfo[i].id && progressId != ""){
-				jarallax.addAnimation("#"+progressInfo[i].id,progressArray);
-
-				progressArray = new Array();
-				progressId = progressInfo[i].id;
+		// group by item.id
+		var queues = {};
+		progressInfo.forEach(function(item, idx){
+			if( ! queues[item.id] ){
+				queues[item.id] = [];
 			}
-			if (progressInfo[i].type == 1) {
-				progressArray.push({
-							progress : progressInfo[i].progress,
-							top : progressInfo[i].value
-						});
-			}
-			else if(progressInfo[i].type == 2){
-				progressArray.push({
-							progress : progressInfo[i].progress,
-							left: progressInfo[i].value
-						});
-			}
-			else if(progressInfo[i].type == 3){
-				progressArray.push({
-							progress : progressInfo[i].progress,
-							opacity: progressInfo[i].value
-						});
-			}	
-			
-				
-		};
+			queues[item.id].push(item);
+		})
 
+		for(var id in queues){
 
+			// default value
+			jarallax.setDefault('#'+id, {
+				opacity:$('#'+id).css('opacity'),
+				top : $('#'+id).css('top'),
+				left : $('#'+id).css('left')
+			})
 
-		jarallax.setProgress(0.5);
+			var queue = queues[id];
+			var arr = [];
+			queue.sort(function(a, b){
+				return parseInt(a.progress) - parseInt(b.progress);
+			})
+
+			queue.forEach(function(item, idx){
+				switch(item.type){
+					case 1:
+						arr.push({
+							progress : item.progress,
+							top : item.value
+						});
+						break;
+					case 2:
+						arr.push({
+							progress : item.progress,
+							left: item.value
+						});
+						break;
+					case 3:
+						arr.push({
+							progress : item.progress,
+							opacity: item.value
+						});
+						break;
+				}
+			})
+			jarallax.addAnimation('#'+id, arr);
+		}
+
 	}
 
 
