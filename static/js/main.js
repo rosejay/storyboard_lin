@@ -194,7 +194,7 @@ $(document).ready(function(){
 						
 						var $box = createImageBox(evt.target.result, e.pageX, e.pageY)
 						$('#dropzone').append( $box );
-    
+
 					};
 					reader.readAsDataURL(e.dataTransfer.files[0]);
 				}
@@ -261,65 +261,107 @@ $(document).ready(function(){
 							<div class='add addTop'></div>\
 							<div class='add addLeft'></div>\
 							<div class='add addOpacity'></div>\
-							<div class='add addAll'></div>\
 						</div>");
 			// delete image
 			$box.find('.do_click').click(function(){
 				$box.remove();
 			});	    
+						// make image dragable
+			$box.draggable({
+	            start: function() {
+	                exitSetProgressMode();
+	            }
+	        });
 
-			// add left animation mode
+			// add animation mode
 			$box.find('.timelineControl div').click(function(){
-				$('.control').remove();
 
-				var currentID = $box.find('img').attr('id');
-				var currentType = 0;
-				
-				$(this).parents().css("opacity",1);
-				$(this).parents().children(".add").removeClass("sel");
-				$(this).addClass('sel');
-				var curX = parseInt($(this).parents().parents().css("left"));
-				var curY = parseInt($(this).parents().parents().css("top")) + img.height;
-				console.log($(this).parents().parents().css("left"),$(this).parents().parents().css("top"));
-				
-				if($(this).hasClass("addTop")){
-					currentType = 1;
-					var $box2 = createControlBox("top",curX,curY);
-				}
-				else if ($(this).hasClass("addLeft")) {
-					currentType = 2;
-					var $box2 = createControlBox("left",curX,curY);
+				if ($(this).hasClass('sel')) {
+					exitSetProgressMode();
 				}
 				else{
-					currentType = 0;
-					var $box2 = createControlBox("opacity",curX,curY);
-				}
-				
-				$('#dropzone').append($box2);
 
-				$box2.find('span').click(function(){
-					progressInfo.push({
-						id : currentID,
-						type : currentType,
-						progress : $(this).parents().parents().attr('title'),
-						value : $(this).html()
+					$('.control').remove();
+					var currentID = $box.find('img').attr('id');
+					var currentType = 0;
+					
+					$(this).parent().css("opacity",1);
+					$(this).parent().children(".add").removeClass("sel");
+					$(this).addClass('sel');
+					var curX = parseInt($(this).parent().parent().css("left"));
+					var curY = parseInt($(this).parent().parent().css("top")) + img.height;
+					
+					if($(this).hasClass("addTop")){
+						currentType = 1;
+						var $box2 = createControlBox("top",curX,curY);
+					}
+					else if ($(this).hasClass("addLeft")) {
+						currentType = 2;
+						var $box2 = createControlBox("left",curX,curY);
+					}
+					else{
+						currentType = 3;
+						var $box2 = createControlBox("opacity",curX,curY);
+					}
+					
+					$('#dropzone').append($box2);
+					initData();
+
+					// init data for control bar
+					function initData(){
+						for(var i=0; i<progressInfo.length; i++){
+							if(progressInfo[i].id == currentID){
+								if (progressInfo[i].type == 1){
+									$div = $("<div title='top' class='topAnimation sel'><p>top:"+progressInfo[i].value+"</p></div>");
+								} 
+								else if (progressInfo[i].type == 2){
+									$div = $("<div title='left' class='leftAnimation sel'><p>left:"+progressInfo[i].value+"</p></div>");
+								}
+								else if (progressInfo[i].type == 3){
+									$div = $("<div title='opacity' class='opacityAnimation sel'><p>opacity:"+progressInfo[i].value+"</p></div>");
+								}
+
+								var n = parseInt(progressInfo[i].progress)/2+1;
+								$box2.find('.progress li:nth-child('+n+')').append($div);
+							}
+						}
+						for(var i = 0; i<50; i++){
+							if (currentType == 1){
+								$p = $("<p><span>-100%</span> <span>0%</span> <span>100%</span>(top)</p>");
+							} 
+							else if (currentType == 2){
+								$p = $("<p><span>-100%</span> <span>0</span> <span>100%</span>(left)</p>");
+							}
+							else if (currentType == 3){
+								$p = $("<p><span>0%</span> <span>100%</span>(opacity)</p>");
+							}
+							$box2.find('.progress li:nth-child('+(i+1)+')').append($p);
+						}
+					}
+
+					$box2.find('span').click(function(){
+						progressInfo.push({
+							id : currentID,
+							type : currentType,
+							progress : $(this).parent().parent().attr('title'),
+							value : $(this).html()
+						});
+						if (currentType == 1) {
+			        		var $a = $("<div title='top' class='topAnimation sel'><p>top:"+$(this).html()+"</p></div>");
+			        	}
+			        	else if(currentType == 2) {
+			        		var $a = $("<div title='left' class='leftAnimation sel'><p>left:"+$(this).html()+"</p></div>");
+			        	}
+			        	else if(currentType == 3){
+			        		var $a = $("<div title='opacity' class='opacityAnimation sel'><p>opacity:"+$(this).html()+"</p></div>");
+			        	}
+
+			        	$(this).parent().parent().append($a);
+			        	$(this).parent().remove();
 					});
-					if (currentType == 1) {
-		        		var $a = $("<div title='top' class='topAnimation sel'><p>top:"+$(this).html()+"</p></div>");
-		        	}
-		        	else if(currentType == 2) {
-		        		var $a = $("<div title='left' class='leftAnimation sel'><p>left:"+$(this).html()+"</p></div>");
-		        	}
-		        	else{
-		        		var $a = $("<div title='opacity' class='opacityAnimation sel'><p>opacity:"+$(this).html()+"</p></div>");
-		        	}
 
-		        	$(this).parents().parents().html($a);
-				});
-
-			});
-			// make image dragable
-			$box.draggable();
+				}
+			});// end add animation mode
 
 			imageId++;
 
@@ -332,13 +374,13 @@ $(document).ready(function(){
 
 	var createTextBox = (function(){
 		var textId = 0;
-		var color1 = (240,120,152);
-		var color2 = (83,197,197);
+		var color1 = (60,204,255);
+		var color2 = (151,223,249);
 		var color3 = (255,255,255);
 		var color4 = (195,195,195);
 		var color5 = (0,0,0);
 
-		var textcolor = "rgb(240,120,152)";
+		var textcolor = "rgb(60,204,255)";
 		var textbgcolor = new Array();
 		textbgcolor[0] = 255;
 		textbgcolor[1] = 255;
@@ -348,6 +390,8 @@ $(document).ready(function(){
 
 		textbgA = generateRGBA(textbgcolor, textbgalpha);
 		textbg = generateRGB(textbgcolor);
+
+		var isEditMode = 0;
 
 		return function(x,y){
 			var tempWidth = 540;
@@ -370,6 +414,12 @@ $(document).ready(function(){
 			$box.append("<div class='textArea'>\
 					<input type='text' class='text' style='color:"+textcolor+"; background:"+textbgA+";font-size:"+textsize+"' value=''>\
 					<div class='textDone'></div>\
+					<div class='textDelete' style='display:none'></div>\
+				</div>\
+				<div class='timelineControl' style='display:none'>\
+					<div class='add addTop'></div>\
+					<div class='add addLeft'></div>\
+					<div class='add addOpacity'></div>\
 				</div>\
       			<div class='attr'>\
         			<div class='block background'>\
@@ -393,7 +443,27 @@ $(document).ready(function(){
      			</div></div>");
 
 			// make image dragable
-			$box.draggable();
+			$box.draggable({
+	            start: function() {
+	                exitSetProgressMode();
+	            }
+	        });
+
+			$box.hover(
+				function(){
+					if(!isEditMode){
+						setNotEditMode();
+					}
+				},
+				function(){
+					setEditMode();
+				}
+			);
+			
+			// click delete btn
+			$box.find('.textDelete').click(function(e){
+				$box.remove();
+			});
 
 			// click ok btn
 			$box.find('.textDone').click(function(e){
@@ -410,39 +480,52 @@ $(document).ready(function(){
 			// replace the input element with p element 
 			$box.find('input.text').blur(blur)
 			function blur(e){
-				$box.find('.attr').fadeOut(150);
-				$box.css("height",70);
-				$box.find('.textDone').fadeOut(150);
-				e.stopPropagation();
-
-				var text = $(this).val();
-				var $p = $("<p class='text' >"+text+"</p>");
-				$(this).replaceWith($p);
-				resetStyle();
-				// click to show the input element
-				// enter edit mode
-				$p.dblclick(function(e){
+				isEditMode = 0;
+				if($(this).val() == ""){
+					$(this).parent().parent().remove();
+				}
+				else{
+					$box.find('.attr').fadeOut(150);
+					//$box.css("height",70);
+					$box.find('.textDone').fadeOut(150);
 					e.stopPropagation();
-					
-					var $input = $("<input type='text' class='text' />");
-					$box.find('.attr').fadeIn(150);
-					$box.find('.textDone').fadeIn(150);
-					$box.css("height",135);
-					// use the text in the closure
-					$input.val(text);
-					$(this).replaceWith($input);
-					resetStyle();
-					$input.focus();
 
-					$input.blur( blur );
-					
-				})
+					var text = $(this).val();
+					var $p = $("<p class='text' >"+text+"</p>");
+					$(this).replaceWith($p);
+					resetStyle();
+					// click to show the input element
+					// enter edit mode
+					$p.dblclick(function(e){
+						e.stopPropagation();
+						isEditMode = 1;
+						setEditMode();
+
+						var $input = $("<input type='text' class='text' />");
+						$box.find('.attr').fadeIn(150);
+						$box.find('.textDone').fadeIn(150);
+						$box.css("height",135);
+						// use the text in the closure
+						$input.val(text);
+						$(this).replaceWith($input);
+						resetStyle();
+						$input.focus();
+
+						$input.blur( blur );
+
+						$input.bind('keyup',function(event) {  
+			          		if(event.keyCode==13){  
+			                	$box.find('input.text').blur();
+			        		}  
+			         	}); 
+					})
+				}
 			}
 
 			// change font color
 			$box.find('.block.fontcolor .block').click(function(e){
 				var color = $(this).css("background-color");
-				$(this).parents().children(".block").removeClass("sel");
+				$(this).parent().children(".block").removeClass("sel");
 				$(this).addClass("sel");
 				var parts = color.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
 				textcolor = "rgb("+parseInt(parts[1])+","+parseInt(parts[2])+","+parseInt(parts[3])+")";
@@ -453,16 +536,13 @@ $(document).ready(function(){
 			// change background color
 			$box.find('.block.background .block').click(function(e){
 				var color = $(this).css("background-color");
-				$(this).parents().children(".block").removeClass("sel");
+				$(this).parent().children(".block").removeClass("sel");
 				$(this).addClass("sel");
 				var parts = color.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
 				for (var i = 0; i < 3; i++) {
 				    textbgcolor[i] = parseInt(parts[i+1]);
 				}
 
-				textbgA = generateRGBA(textbgcolor,textbgalpha);
-
-				textbg = generateRGB(textbgcolor);
 				resetStyle();
 			});
 
@@ -476,6 +556,10 @@ $(document).ready(function(){
 	                    this.bgalpha = textbgalpha;
 	                },
 	                update: function () {
+	                	textsize = this.fontsize;
+	                	textbgalpha = this.bgalpha;
+	                	resetStyle();
+
 	                    $box.find('.text').css({
 	                    		"font-size": this.fontsize,
 	                    		"background": "rgba("+textbgcolor[0]+","+textbgcolor[1]+","+textbgcolor[2]+","+this.bgalpha/100.0+")"
@@ -490,6 +574,9 @@ $(document).ready(function(){
 	            });
 	        }
 	        function resetStyle(){
+	        	textbg = generateRGB(textbgcolor);
+	        	textbgA = generateRGBA(textbgcolor,textbgalpha);
+
 	        	$box.find('.text').css("color",textcolor);
 				$box.find('.block.fontsize').css("color",textcolor);
 				$box.find('.block.fontcolor .block.fontcolor').css("background",textcolor);
@@ -503,8 +590,109 @@ $(document).ready(function(){
 				$box.find('.block.fontsize').css("background",textbgA);
 
 	        }
-	        
+	        function setEditMode(){
+				$('.textDelete').css('display','none').fadeOut(150);
+				$('.timelineControl').css('opacity',0).fadeOut(150);
+			}
+			function setNotEditMode(){
+				$('.textDelete').fadeIn(150);
+				$('.timelineControl').css('opacity',1).fadeIn(150);
+			}
+
+			// add animation mode <- the same!!
+			$box.find('.timelineControl div').click(function(){
+
+				isControlMode = 1;
+				if ($(this).hasClass('sel')) {
+					exitSetProgressMode();
+				}
+				else{
+
+					$('.control').remove();
+					var currentID = $box.attr('id'); // diff
+					var currentType = 0;
+					
+					$(this).parent().css("opacity",1);
+					$(this).parent().children(".add").removeClass("sel");
+					$(this).addClass('sel');
+					var curX = parseInt($(this).parent().parent().css("left"));
+					var curY = parseInt($(this).parent().parent().css("top")) + 135; // diff
+					
+					if($(this).hasClass("addTop")){
+						currentType = 1;
+						var $box2 = createControlBox("top",curX,curY);
+					}
+					else if ($(this).hasClass("addLeft")) {
+						currentType = 2;
+						var $box2 = createControlBox("left",curX,curY);
+					}
+					else{
+						currentType = 3;
+						var $box2 = createControlBox("opacity",curX,curY);
+					}
+					
+					$('#dropzone').append($box2);
+					initData();
+
+					// init data for control bar
+					function initData(){
+						for(var i=0; i<progressInfo.length; i++){
+							if(progressInfo[i].id == currentID){
+								if (progressInfo[i].type == 1){
+									$div = $("<div title='top' class='topAnimation sel'><p>top:"+progressInfo[i].value+"</p></div>");
+								} 
+								else if (progressInfo[i].type == 2){
+									$div = $("<div title='left' class='leftAnimation sel'><p>left:"+progressInfo[i].value+"</p></div>");
+								}
+								else if (progressInfo[i].type == 3){
+									$div = $("<div title='opacity' class='opacityAnimation sel'><p>opacity:"+progressInfo[i].value+"</p></div>");
+								}
+
+								var n = parseInt(progressInfo[i].progress)/2+1;
+								$box2.find('.progress li:nth-child('+n+')').append($div);
+							}
+						}
+						for(var i = 0; i<50; i++){
+							if (currentType == 1){
+								$p = $("<p><span>-100%</span> <span>0%</span> <span>100%</span>(top)</p>");
+							} 
+							else if (currentType == 2){
+								$p = $("<p><span>-100%</span> <span>0</span> <span>100%</span>(left)</p>");
+							}
+							else if (currentType == 3){
+								$p = $("<p><span>0%</span> <span>100%</span>(opacity)</p>");
+							}
+							$box2.find('.progress li:nth-child('+(i+1)+')').append($p);
+						}
+					}
+
+					$box2.find('span').click(function(){
+						progressInfo.push({
+							id : currentID,
+							type : currentType,
+							progress : $(this).parent().parent().attr('title'),
+							value : $(this).html()
+						});
+						if (currentType == 1) {
+			        		var $a = $("<div title='top' class='topAnimation sel'><p>top:"+$(this).html()+"</p></div>");
+			        	}
+			        	else if(currentType == 2) {
+			        		var $a = $("<div title='left' class='leftAnimation sel'><p>left:"+$(this).html()+"</p></div>");
+			        	}
+			        	else if(currentType == 3){
+			        		var $a = $("<div title='opacity' class='opacityAnimation sel'><p>opacity:"+$(this).html()+"</p></div>");
+			        	}
+
+			        	$(this).parent().parent().append($a);
+			        	$(this).parent().remove();
+					});
+
+				}
+			});// end add animation mode
+
+
 			textId++;
+			isEditMode = 1;
 			return $box;
 		}
 		function generateRGBA(rgb,a){
@@ -521,7 +709,6 @@ $(document).ready(function(){
 	});
 
 	$('#dropzone').click(function(e){
-
 		if(isAddText){
 			var $box = createTextBox(e.pageX,e.pageY);
 			$(this).append($box);
@@ -536,6 +723,7 @@ $(document).ready(function(){
 		isAddText = ! isAddText;
 		if(isAddText){
 			$('.addText').addClass('active');
+			exitSetProgressMode();
 		}else{
 			$('.addText').removeClass('active');
 		}
@@ -550,19 +738,12 @@ $(document).ready(function(){
 	var createControlBox = (function(){
 
 		return function(type,x,y){
-			var controlWidth = 740;
-			var controlHeight = 60;
 
-			var width = $('.right-panel').css("width");
-			var height = $('.right-panel').css("height");
 			var colorTop = "#D71921";
 			var colorLeft = "#00AEEF";
 			var colorOpacity = "#29AE6E";
 
-			var left = (parseInt(width)-controlWidth)/2;
-			var top = parseInt(height)-controlHeight - 20;
-
-			$box = $("<div class='control' style='left:"+(x-80)+"px;top:"+(y+20)+"px'></div>");
+			$box = $("<div class='control' style='left:"+(x-80)+"px;top:"+(y+30)+"px'></div>");
 
 			var html = "";
 			if (type == "top") {
@@ -580,27 +761,13 @@ $(document).ready(function(){
 			
 	          
 	        for(var i = 0; i<100; i+=2){
-	        	html += "<li title='"+i+"%'>";
-	        	//html += "<a title='left' class='leftAnimation'></a>";
-	        	//html += "<a title='top' class='topAnimation'></a>";
-	            //html += "<a title='opacity' class='opacityAnimation'><p>"+i+"</p></a>";
-	            if(type == "top"){
-	            	html += "<p>top:<span>0%</span> <span>100%</span></p>";
-	            }
-	            else if(type == "left"){
-	            	html += "<p>left:<span>-100%</span> <span>0</span> <span>100%</span></p>";
-	            }
-	            else{
-	            	html += "<p>opacity:<span>0%</span> <span>100%</span></p>";
-	            }
-	            
-	            html += "</li>";
+	        	html += 		"<li title='"+i+"%'></li>";
 	        }
 	        html += 		"</ul>";
 	        html += 		"<ul class='percent'>";
 
 	        for(i=0; i<=100; i+=10){
-	        	html += "<li>"+i+"</li>";
+	        	html += 		"<li>"+i+"</li>";
 	        }
 
 	        html += 		"</ul>";
@@ -612,8 +779,82 @@ $(document).ready(function(){
 			return $box;
 		}
 	})()
-
 	
+	function exitSetProgressMode(){
+		$('.timelineControl').removeAttr('style');
+		$('.timelineControl .add').removeClass('sel');
+		$('.control').remove();
+	}
 
-	
+	var isPlay = false;
+	var jarallax;
+	$('.play').click(function(e){
+
+		togglePlayMode();
+		if (isPlay){
+			exitSetProgressMode();
+			initAnimation();
+		}
+	});
+
+	function togglePlayMode(){
+		isPlay = ! isPlay;
+		if(isPlay){
+			$('.play').addClass('active');
+		}else{
+			$('.play').removeClass('active');
+			jarallax = new Jarallax();
+		}
+	}
+
+	function initAnimation(){
+
+		jarallax = new Jarallax();
+		
+		// sort by type
+		progressInfo.sort(
+			function(a,b){
+				return a.type-b.type
+		});
+
+		// sort by progress
+		var num = new Array();
+		num[0] = num[1] = num[2] = 0;
+		progressInfo.sort(
+			function(a,b){
+				if (a.type == b.type == 1){
+					num[0] ++;
+				}
+				else if (a.type == b.type == 2){
+					num[1] ++;
+				}
+				else if (a.type == b.type == 3){
+					num[2] ++;
+				}
+				return a.progress-b.progress
+		});
+
+		// generate
+		for(var i = 0; i<num[0]-1; i++)
+			jarallax.addAnimation("#"+progressInfo[i].id,
+				[{progress: progressInfo[i].progress, top: progressInfo[i].value}, 
+				 {progress: progressInfo[i+1].progress, top: progressInfo[i+1].value}]
+			);
+		
+		for(i = num[0]; i<num[0]+num[1]-1; i++)
+			jarallax.addAnimation("#"+progressInfo[i].id,
+				[{progress: progressInfo[i].progress, left: progressInfo[i].value}, 
+				 {progress: progressInfo[i+1].progress, left: progressInfo[i+1].value}]
+			);
+		
+		for(i = num[0]+num[1]; i<num[0]+num[1]+num[2]-1; i++)
+			jarallax.addAnimation("#"+progressInfo[i].id,
+				[{progress: progressInfo[i].progress, opacity: progressInfo[i].value}, 
+				 {progress: progressInfo[i+1].progress, opacity: progressInfo[i+1].value}]
+			);
+
+		jarallax.setProgress(0.5);
+	}
+
+
 });

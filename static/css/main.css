@@ -190,6 +190,7 @@ body{
 	float: left;
 	display: inline-block;
 	cursor: pointer;
+	overflow: hidden;
 	padding: 0 15px;
 	height: 33px;
 	width: 140px;
@@ -224,9 +225,9 @@ body{
 	display:inline-block;
 }
 .img-box:hover{
-	-moz-box-shadow: 0 0 5px #aaa;
-	-webkit-box-shadow: 0 0 5px #aaa;
-	box-shadow: 0 0 5px #aaa;
+	-moz-box-shadow: 0 0 5px #ccc;
+	-webkit-box-shadow: 0 0 5px #ccc;
+	box-shadow: 0 0 5px #ccc;
 }
 .img-box:hover .scaleControl,
 .img-box:hover .deletePic,
@@ -237,6 +238,10 @@ body{
 	-moz-transition:all 0.5s; /* Firefox 4 */
 	-webkit-transition:all 0.5s; /* Safari and Chrome */
 	-o-transition:all 0.5s; /* Opera */
+}
+.text-editor .timelineControl{
+	bottom: 0;
+	left: 0;
 }
 .timelineControl{
 	opacity: 0;
@@ -389,12 +394,19 @@ body{
 }
 .text-editor .textDone{
 	background: url(../img/done.png) no-repeat;
+}
+.text-editor .textDelete,
+.text-editor .textDone{
 	width: 70px;
 	height: 70px;
 	float: left;
 	cursor: pointer;
 }
-.text-editor .textDone:hover{
+.text-editor .textDelete{
+	background: url(../img/delete.png) no-repeat;
+}
+.text-editor .textDone:hover,
+.text-editor .textDelete:hover{
 	background-position: 0 -70px;
 }
 .text-editor input.text{
@@ -407,15 +419,15 @@ body{
 	font-size: 30px;
 	line-height: 60px;
 	padding: 10px 20px 0;
-	color: #f07898;
+	color: #3cccff;
 	background: rgba(255, 255, 255, 0.6);
 	float: left;
 	font-weight: bold;
 }
 .text-editor .text:hover{
-	-moz-box-shadow: 0 0 7px #ccc;
-	-webkit-box-shadow: 0 0 7px #ccc;
-	box-shadow: 0 0 7px #ccc;
+	-moz-box-shadow: 0 0 5px #ccc;
+	-webkit-box-shadow: 0 0 5px #ccc;
+	box-shadow: 0 0 5px #ccc;
 }
 .text-editor .attr{
 	margin: 5px 0 0 0;
@@ -461,10 +473,10 @@ body{
 	cursor: default;
 }
 .text-editor .block.background .block.color1{
-	background: #f07898;
+	background: #3cccff;
 }
 .text-editor .block.background .block.color2{
-	background: #53c5c5;
+	background: #97dff9;
 }
 .text-editor .block.background .block.color3{
 	background: #fff;
@@ -508,15 +520,15 @@ body{
 	display: none;
 }
 .text-editor .block.fontcolor .block.fontcolor{
-	background: #f07898;
+	background: #3cccff;
 	opacity: 1;
 	cursor: default;
 }
 .text-editor .block.fontcolor .block.color1{
-	background: #f07898;
+	background: #3cccff;
 }
 .text-editor .block.fontcolor .block.color2{
-	background: #53c5c5;
+	background: #97dff9;
 }
 .text-editor .block.fontcolor .block.color3{
 	background: #fff;
@@ -529,7 +541,7 @@ body{
 }
 
 .text-editor .block.fontsize{
-	color: #f07898;
+	color: #3cccff;
 	float: right;
 	background: rgba(255,255,255,0.6);
 }
@@ -574,6 +586,7 @@ body{
 }
 .control ul.progress li{
 	cursor: pointer;
+	position: relative;
 	float: left;
 	width: 11px;
 	background: #CCC;
@@ -581,8 +594,8 @@ body{
 	margin-right: 1px;
 }
 .control ul.progress li div{
-	float: left;
-	height: 30px;
+	position: absolute;
+	height: 10px;
 	width: 100%;
 	display: block;
 }
@@ -621,8 +634,7 @@ body{
 }
 
 
-.control ul.progress li div p,
-.control ul.progress li p{
+.control ul.progress li div p{
 	display: block;
     margin: 0;
     height: 25px;
@@ -635,11 +647,30 @@ body{
     font-size: 11px;
     line-height: 20px;
     color: #fff;
+    z-index: 0;
 }
-.control ul.progress li p span{
+.control ul.progress li p{
+	display: block;
+    margin: 0;
+    height: 25px;
+    width: 11px;
+    overflow: hidden;
+    padding: 0;
+    background: #ccc;
+    text-indent: -9000px;
+    font-size: 11px;
+    line-height: 20px;
+    color: #fff;
+}
+.control ul.progress li:hover p{
+	position: absolute;
+    left: 0;
+    z-index: 100;
+}
 
+.control ul.progress li p span{
 	height: 20px;
-	margin: 0 0 0 10px;
+	margin: 0 7px 0 0;
 	cursor: pointer;
 }
 .control ul.progress li p span:hover{
@@ -660,6 +691,30 @@ body{
     background: #ccc;  
     text-indent: 0;
     white-space: nowrap;
+}
+.control ul.progress li:hover div p{
+	position: relative;
+    left: 0;
+}
+
+.control ul.progress li div.sel:nth-child(1){
+	top: 20px;
+}
+.control ul.progress li div.sel:nth-child(2){
+	top: 10px;
+}
+.control ul.progress li div.sel:nth-child(3){
+	top: 0;
+}
+
+.control ul.progress li div.sel:nth-child(1) p{
+	margin: -40px 0 0 0;
+}
+.control ul.progress li div.sel:nth-child(2) p{
+	margin: -50px 0 0 0;
+}
+.control ul.progress li div.sel:nth-child(3) p{
+	margin: -60px 0 0 0;
 }
 
 
