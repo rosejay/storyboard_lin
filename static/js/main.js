@@ -2,17 +2,85 @@
 $(document).ready(function(){
 	
 
-	var dirs = new Array(new Array(), new Array());
-	var folders = new Array();
-	var isLeftShow = 1;
+	var dirs = new Array(new Array(), new Array()); // data of image dirs and folders 
+	var folders = new Array(); // folder names
 
-	var progressInfo = [];
+	var isLeftShow = true; // toggle to show left window
+	var isAddText = false; // toggle to enter add text mode
+	var isProgressMode = false; // toggle to enter setting of animation mode
+	var isEditMode = false; // toggle to enter text edit mode
+	var progressInfo = []; // animation info array
 
+	/**
+	 * toggle to show left window
+	 */
+	$('.closeLeftBtn').click(function(e){
+		toggleShowLeftWindow();
+	});
+	function toggleShowLeftWindow(){
+		isLeftShow = ! isLeftShow;
+		if(isLeftShow){
+			$('.left-panel').css("width",200);
+			$('.closeLeftBtn').animate({ left:204 },150);
+		}
+		else{
+			$('.left-panel').css("width",0);
+			$('.closeLeftBtn').animate({ left:4 },150);
+		}
+	}
+
+	/**
+	 * toggle to enter add text mode
+	 */
+	$('.addText').click(function(e){
+		toggleTextMode();
+	});
+	function toggleTextMode(){
+		isAddText = ! isAddText;
+		if(isAddText){
+			$('.addText').addClass('active');
+			exitProgressMode();
+		}
+		else{
+			$('.addText').removeClass('active');
+		}
+	}
+
+
+
+
+	function toggleProgressMode(){
+		isProgressMode = !isProgressMode;
+		if(isProgressMode){
+
+		}
+		else{
+			exitProgressMode();
+		}
+	}
+
+	function exitProgressMode(){
+		$('.timelineControl').removeAttr('style');
+		$('.timelineControl .add').removeClass('sel');
+		$('.control').remove();
+	}
+
+
+
+	
+	$(window).resize(function() {
+		
+	});
+
+
+
+	/**
+	 * get file names and folders
+	 */
 	$.get('http://localhost:8888/get/files', function(res){
 		//generate files dirs
 		var temphtml = "";
 		var temphtmldrop = "";
-
 		var currentFolder= 0;
 
 		for(var i = 0; i<res.files.length; i++){
@@ -48,7 +116,9 @@ $(document).ready(function(){
 
 		change_folder(0);
 
-		//combobox
+		/**
+	 	 * combox
+	 	 */
 		$('.J_select_current_option').each(function(){
 			$(this).click(function(){
 				var $this = $(this), select_drop = $this.siblings('.J_select_drop'), show_input = $this.find('.J_input_show');
@@ -91,7 +161,9 @@ $(document).ready(function(){
 			});
 		}
 
-		//
+		/**
+	 	 * change folders, reset file list
+	 	 */
 		function change_folder(num){
 			$('.material-list ul li').remove();
 			temphtml = "";
@@ -115,6 +187,7 @@ $(document).ready(function(){
 			$('.material-list li').each(function(){
 				var img = $(this).find('')
 				this.addEventListener('dragstart', function(e){
+					exitProgressMode();
 					e.dataTransfer.setData('text/plain', JSON.stringify({
 						src : "materials/"+folders[currentFolder]+"/"+e.target.innerHTML
 					}))
@@ -185,7 +258,6 @@ $(document).ready(function(){
 					var $box = createImageBox(data.src, e.pageX, e.pageY);
 
 					$('#dropzone').append($box);
-
 				}
 				else{  //drop img from desktop
 
@@ -201,28 +273,30 @@ $(document).ready(function(){
 				
 			}, false);
 
+			$('#dropzone').click(function(e){
+				if(isAddText){
+					var $box = createTextBox(e.pageX,e.pageY);
+					$(this).append($box);
+					$box.find('.text').focus();
+
+					toggleTextMode();
+				}
+			});
+
 		}
 
 
 		  
 
-		$('.closeLeftBtn').click(function(e){
-			if(isLeftShow == 1){// close left
-				$('.left-panel').css("width",0);
-				$(this).animate({ left:4 },150);
-				isLeftShow = 0;
-			}
-			else{// open left
-				$('.left-panel').css("width",200);
-				$(this).animate({ left:204 },150);
-				isLeftShow = 1;
-			}
-		});
+
 
 	}
 
+	/**
+	 * class of imageBox
+	 */
 	var createImageBox = (function(){
-		var imageId = 0;
+		var imageId = 0; // image id
 
 		return function(src,x,y){
 
@@ -230,11 +304,14 @@ $(document).ready(function(){
 			img.id="img"+imageId;
 
 			img.onload = function(){
+
+				// image resizable
 				$(img).attr('width', img.width+'px');
 				$(img).attr('height', img.height+'px');
+				$(img).resizable(); 
 
-				$(img).resizable();
-
+				// image located according current cursor position
+				// cursor position is the center of a image
 				$box.css({
 					left : (x-img.width/2)+'px',
 					top : (y-img.height/2) + 'px'
@@ -245,6 +322,7 @@ $(document).ready(function(){
 			if (isLeftShow)
 				x -= 250;
 
+			// imageBox templates
 			var $box = $("<div id='imgBox"+imageId+"' style='position:absolute;' class='img-box'></div>");
 			$box.append(img);
 			$box.append("<div class='scaleControl'></div>\
@@ -254,7 +332,7 @@ $(document).ready(function(){
 								<span>Really?</span>\
 								<a click='' class='do_click'>Yes</a>\
 								<span>/</span>\
-								<a click=''>No</a>\
+								<a click='' class='cancel_click'>No</a>\
 							</div>\
 						</div>\
 						<div class='timelineControl'>\
@@ -262,106 +340,27 @@ $(document).ready(function(){
 							<div class='add addLeft'></div>\
 							<div class='add addOpacity'></div>\
 						</div>");
-			// delete image
+
+			/**
+			 * delete an image
+			 */
 			$box.find('.do_click').click(function(){
 				$box.remove();
 			});	    
-						// make image dragable
+
+			/**
+			 * drag an image
+			 */
 			$box.draggable({
 	            start: function() {
-	                exitSetProgressMode();
+	                exitProgressMode();
 	            }
 	        });
 
-			// add animation mode
+			// setting of animation mode
 			$box.find('.timelineControl div').click(function(){
-
-				if ($(this).hasClass('sel')) {
-					exitSetProgressMode();
-				}
-				else{
-
-					$('.control').remove();
-					var currentID = $box.attr('id');
-					var currentType = 0;
-					
-					$(this).parent().css("opacity",1);
-					$(this).parent().children(".add").removeClass("sel");
-					$(this).addClass('sel');
-					var curX = parseInt($(this).parent().parent().css("left"));
-					var curY = parseInt($(this).parent().parent().css("top")) + img.height;
-					
-					if($(this).hasClass("addTop")){
-						currentType = 1;
-						var $box2 = createControlBox("top",curX,curY);
-					}
-					else if ($(this).hasClass("addLeft")) {
-						currentType = 2;
-						var $box2 = createControlBox("left",curX,curY);
-					}
-					else{
-						currentType = 3;
-						var $box2 = createControlBox("opacity",curX,curY);
-					}
-					
-					$('#dropzone').append($box2);
-					initData();
-
-					// init data for control bar
-					function initData(){
-						for(var i=0; i<progressInfo.length; i++){
-							if(progressInfo[i].id == currentID){
-								if (progressInfo[i].type == 1){
-									$div = $("<div title='top' class='topAnimation sel'><p>top:"+progressInfo[i].value+"</p></div>");
-								} 
-								else if (progressInfo[i].type == 2){
-									$div = $("<div title='left' class='leftAnimation sel'><p>left:"+progressInfo[i].value+"</p></div>");
-								}
-								else if (progressInfo[i].type == 3){
-									$div = $("<div title='opacity' class='opacityAnimation sel'><p>opacity:"+progressInfo[i].value+"</p></div>");
-								}
-
-								var n = parseInt(progressInfo[i].progress)/2+1;
-								$box2.find('.progress li:nth-child('+n+')').append($div);
-							}
-						}
-						for(var i = 0; i<50; i++){
-							if (currentType == 1){
-								$p = $("<p><span>-100%</span> <span>0%</span> <span>100%</span>(top)</p>");
-							} 
-							else if (currentType == 2){
-								$p = $("<p><span>-100%</span> <span>0</span> <span>100%</span>(left)</p>");
-							}
-							else if (currentType == 3){
-								$p = $("<p><span>0</span> <span>1</span>(opacity)</p>");
-							}
-							$box2.find('.progress li:nth-child('+(i+1)+')').append($p);
-						}
-					}
-
-					$box2.find('span').click(function(){
-						progressInfo.push({
-							id : currentID,
-							type : currentType,
-							progress : $(this).parent().parent().attr('title'),
-							value : $(this).html()
-						});
-						if (currentType == 1) {
-			        		var $a = $("<div title='top' class='topAnimation sel'><p>top:"+$(this).html()+"</p></div>");
-			        	}
-			        	else if(currentType == 2) {
-			        		var $a = $("<div title='left' class='leftAnimation sel'><p>left:"+$(this).html()+"</p></div>");
-			        	}
-			        	else if(currentType == 3){
-			        		var $a = $("<div title='opacity' class='opacityAnimation sel'><p>opacity:"+$(this).html()+"</p></div>");
-			        	}
-
-			        	$(this).parent().parent().append($a);
-			        	$(this).parent().remove();
-					});
-
-				}
-			});// end add animation mode
+				timelineListener($(this));
+			});
 
 			imageId++;
 
@@ -371,7 +370,9 @@ $(document).ready(function(){
 
     
       
-
+	/**
+	 * class of textBox
+	 */
 	var createTextBox = (function(){
 		var textId = 0;
 		var color1 = (60,204,255);
@@ -391,7 +392,7 @@ $(document).ready(function(){
 		textbgA = generateRGBA(textbgcolor, textbgalpha);
 		textbg = generateRGB(textbgcolor);
 
-		var isEditMode = 0;
+		
 
 		return function(x,y){
 			var tempWidth = 540;
@@ -445,7 +446,7 @@ $(document).ready(function(){
 			// make image dragable
 			$box.draggable({
 	            start: function() {
-	                exitSetProgressMode();
+	                exitProgressMode();
 	            }
 	        });
 
@@ -480,7 +481,7 @@ $(document).ready(function(){
 			// replace the input element with p element 
 			$box.find('input.text').blur(blur)
 			function blur(e){
-				isEditMode = 0;
+				isEditMode = false;
 				if($(this).val() == ""){
 					$(this).parent().parent().remove();
 				}
@@ -498,7 +499,7 @@ $(document).ready(function(){
 					// enter edit mode
 					$p.dblclick(function(e){
 						e.stopPropagation();
-						isEditMode = 1;
+						isEditMode = true;
 						setEditMode();
 
 						var $input = $("<input type='text' class='text' />");
@@ -592,107 +593,20 @@ $(document).ready(function(){
 	        }
 	        function setEditMode(){
 				$('.textDelete').css('display','none').fadeOut(150);
-				$('.timelineControl').css('opacity',0).fadeOut(150);
+				$box.find('.timelineControl').css('opacity',0).fadeOut(150);
 			}
 			function setNotEditMode(){
 				$('.textDelete').fadeIn(150);
-				$('.timelineControl').css('opacity',1).fadeIn(150);
+				$box.find('.timelineControl').css('opacity',1).fadeIn(150);
 			}
 
-			// add animation mode <- the same!!
+			// setting of animation mode
 			$box.find('.timelineControl div').click(function(){
-
-				isControlMode = 1;
-				if ($(this).hasClass('sel')) {
-					exitSetProgressMode();
-				}
-				else{
-
-					$('.control').remove();
-					var currentID = $box.attr('id'); // diff
-					var currentType = 0;
-					
-					$(this).parent().css("opacity",1);
-					$(this).parent().children(".add").removeClass("sel");
-					$(this).addClass('sel');
-					var curX = parseInt($(this).parent().parent().css("left"));
-					var curY = parseInt($(this).parent().parent().css("top")) + 135; // diff
-					
-					if($(this).hasClass("addTop")){
-						currentType = 1;
-						var $box2 = createControlBox("top",curX,curY);
-					}
-					else if ($(this).hasClass("addLeft")) {
-						currentType = 2;
-						var $box2 = createControlBox("left",curX,curY);
-					}
-					else{
-						currentType = 3;
-						var $box2 = createControlBox("opacity",curX,curY);
-					}
-					
-					$('#dropzone').append($box2);
-					initData();
-
-					// init data for control bar
-					function initData(){
-						for(var i=0; i<progressInfo.length; i++){
-							if(progressInfo[i].id == currentID){
-								if (progressInfo[i].type == 1){
-									$div = $("<div title='top' class='topAnimation sel'><p>top:"+progressInfo[i].value+"</p></div>");
-								} 
-								else if (progressInfo[i].type == 2){
-									$div = $("<div title='left' class='leftAnimation sel'><p>left:"+progressInfo[i].value+"</p></div>");
-								}
-								else if (progressInfo[i].type == 3){
-									$div = $("<div title='opacity' class='opacityAnimation sel'><p>opacity:"+progressInfo[i].value+"</p></div>");
-								}
-
-								var n = parseInt(progressInfo[i].progress)/2+1;
-								$box2.find('.progress li:nth-child('+n+')').append($div);
-							}
-						}
-						for(var i = 0; i<50; i++){
-							if (currentType == 1){
-								$p = $("<p><span>-100%</span> <span>0%</span> <span>100%</span>(top)</p>");
-							} 
-							else if (currentType == 2){
-								$p = $("<p><span>-100%</span> <span>0</span> <span>100%</span>(left)</p>");
-							}
-							else if (currentType == 3){
-								$p = $("<p><span>0</span> <span>1.0</span>(opacity)</p>");
-							}
-							$box2.find('.progress li:nth-child('+(i+1)+')').append($p);
-						}
-					}
-
-					$box2.find('span').click(function(){
-						progressInfo.push({
-							id : currentID,
-							type : currentType,
-							progress : $(this).parent().parent().attr('title'),
-							value : $(this).html()
-						});
-						if (currentType == 1) {
-			        		var $a = $("<div title='top' class='topAnimation sel'><p>top:"+$(this).html()+"</p></div>");
-			        	}
-			        	else if(currentType == 2) {
-			        		var $a = $("<div title='left' class='leftAnimation sel'><p>left:"+$(this).html()+"</p></div>");
-			        	}
-			        	else if(currentType == 3){
-			        		var $a = $("<div title='opacity' class='opacityAnimation sel'><p>opacity:"+$(this).html()+"</p></div>");
-			        	}
-
-			        	$(this).parent().parent().append($a);
-			        	$(this).parent().remove();
-					});
-
-				}
-			});// end add animation mode
-
+				timelineListener($(this));
+			});
 
 			textId++;
-			isEditMode = 1;
+			isEditMode = true;
 			return $box;
 		}
 		function generateRGBA(rgb,a){
@@ -703,38 +617,9 @@ $(document).ready(function(){
 	    }
 	})()
 
-	var isAddText = false;
-	$('.addText').click(function(e){
-		toggleTextMode();
-	});
-
-	$('#dropzone').click(function(e){
-		if(isAddText){
-			var $box = createTextBox(e.pageX,e.pageY);
-			$(this).append($box);
-			$box.find('.text').focus();
-
-			toggleTextMode();
-		}
-	});
-
-	function toggleTextMode(){
-
-		isAddText = ! isAddText;
-		if(isAddText){
-			$('.addText').addClass('active');
-			exitSetProgressMode();
-		}else{
-			$('.addText').removeClass('active');
-		}
-	}
-
-
-	
-	$(window).resize(function() {
-		
-	});
-
+	/**
+	 * class of controlBox
+	 */
 	var createControlBox = (function(){
 
 		return function(type,x,y){
@@ -743,6 +628,7 @@ $(document).ready(function(){
 			var colorLeft = "#00AEEF";
 			var colorOpacity = "#29AE6E";
 
+			// template of controlBox
 			$box = $("<div class='control' style='left:"+(x-80)+"px;top:"+(y+30)+"px'></div>");
 
 			var html = "";
@@ -757,34 +643,134 @@ $(document).ready(function(){
 			}
 			
 			html += 	"<div class='bar'>";
+			// progress ul
 			html += 		"<ul class='progress'>";
-			
-	          
 	        for(var i = 0; i<100; i+=2){
 	        	html += 		"<li title='"+i+"%'></li>";
 	        }
 	        html += 		"</ul>";
+	        // percent ul
 	        html += 		"<ul class='percent'>";
-
 	        for(i=0; i<=100; i+=10){
 	        	html += 		"<li>"+i+"</li>";
 	        }
-
 	        html += 		"</ul>";
+
 	        html += 	"</div>";
 
 	        $box.append(html);
-
-
 			return $box;
 		}
 	})()
 	
-	function exitSetProgressMode(){
-		$('.timelineControl').removeAttr('style');
-		$('.timelineControl .add').removeClass('sel');
-		$('.control').remove();
+
+	function timelineListener(item){
+		$this = item;
+		$box = $this.parent().parent();
+
+		if ($this.hasClass('sel')) {
+			isProgressMode = false;
+			exitProgressMode();
+		}
+		else{
+			isProgressMode = true;
+			$('.control').remove();
+			// generate a new progress bar
+
+			var currentID = $box.attr('id');
+			var currentType = 0;
+
+			// set style
+			$this.parent().css("opacity",1);
+			$this.siblings().removeClass("sel");
+			$this.addClass('sel');
+
+			// get position of the current object
+			var curX = parseInt($this.parent().parent().css("left"));
+			var t = $box.attr('id');
+			if ( t.indexOf('img')!=-1){
+				var curY = parseInt($this.parent().parent().css("top")) + parseInt($box.find('img').attr('height'));
+			}
+			else{
+				var curY = parseInt($this.parent().parent().css("top")) + 135;	
+			}
+				
+			// create control box
+			if($this.hasClass("addTop")){
+				currentType = 1;
+				var $box2 = createControlBox("top",curX,curY);
+			}
+			else if ($this.hasClass("addLeft")) {
+				currentType = 2;
+				var $box2 = createControlBox("left",curX,curY);
+			}
+			else{
+				currentType = 3;
+				var $box2 = createControlBox("opacity",curX,curY);
+			}
+			
+			// add text box
+			$('#dropzone').append($box2);
+			initData();
+
+			// init data for control bar
+			function initData(){
+				for(var i=0; i<progressInfo.length; i++){
+					if(progressInfo[i].id == currentID){
+						if (progressInfo[i].type == 1){
+							$div = $("<div title='top' class='topAnimation sel'><p>top:"+progressInfo[i].value+"</p></div>");
+						} 
+						else if (progressInfo[i].type == 2){
+							$div = $("<div title='left' class='leftAnimation sel'><p>left:"+progressInfo[i].value+"</p></div>");
+						}
+						else if (progressInfo[i].type == 3){
+							$div = $("<div title='opacity' class='opacityAnimation sel'><p>opacity:"+progressInfo[i].value+"</p></div>");
+						}
+
+						var n = parseInt(progressInfo[i].progress)/2+1;
+						$box2.find('.progress li:nth-child('+n+')').append($div);
+					}
+				}
+				for(var i = 0; i<50; i++){
+					if (currentType == 1){
+						$p = $("<p><span>-100%</span> <span>0%</span> <span>100%</span>(top)</p>");
+					} 
+					else if (currentType == 2){
+						$p = $("<p><span>-100%</span> <span>0</span> <span>100%</span>(left)</p>");
+					}
+					else if (currentType == 3){
+						$p = $("<p><span>0</span> <span>1</span>(opacity)</p>");
+					}
+					$box2.find('.progress li:nth-child('+(i+1)+')').append($p);
+				}
+			}
+
+			// set data 
+			$box2.find('span').click(function(){
+				progressInfo.push({
+					id : currentID,
+					type : currentType,
+					progress : $this.parent().parent().attr('title'),
+					value : $this.html()
+				});
+				if (currentType == 1) {
+	        		var $a = $("<div title='top' class='topAnimation sel'><p>top:"+$(this).html()+"</p></div>");
+	        	}
+	        	else if(currentType == 2) {
+	        		var $a = $("<div title='left' class='leftAnimation sel'><p>left:"+$(this).html()+"</p></div>");
+	        	}
+	        	else if(currentType == 3){
+	        		var $a = $("<div title='opacity' class='opacityAnimation sel'><p>opacity:"+$(this).html()+"</p></div>");
+	        	}
+
+	        	$(this).parent().parent().append($a);
+	        	$(this).parent().remove();
+			});
+
+		}
 	}
+		
+
 
 	var isPlay = false;
 	var jarallax;
@@ -795,10 +781,10 @@ $(document).ready(function(){
 
 		togglePlayMode();
 		if (isPlay){
-			exitSetProgressMode();
+			exitProgressMode();
 			initAnimation();
 
-			play(2, 50);
+			play(5, 200);
 		}else{
 			clearInterval(interval);
 		}
