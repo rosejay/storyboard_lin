@@ -223,6 +223,8 @@ $(document).ready(function(){
 			newSlideHtml +="<div id='dropzone' class='slides slide-"+slidenum+ " dropzone' style='position:absolute; top:0;left:0;width:100%;height:100%'></div>";
 			$('.right-panel').append(newSlideHtml);
 
+			var html = "<canvas width='100%' height = '100%' data-processing-sources='js/draw.pde'></canvas>"
+			$('.right-panel').append(html);
 
 			function dragStyle(e){
 				e.stopPropagation();
