@@ -137,6 +137,12 @@ body{
 .toolbar .toolbar-inner li.addCanvas{
 	background: url(../img/addcanvas.png) no-repeat;
 }
+.toolbar .toolbar-inner li.addDash{
+	background: url(../img/dash.png) no-repeat;
+}
+.toolbar .toolbar-inner li.addBrush{
+	background: url(../img/brush.png) no-repeat;
+}
 .toolbar .toolbar-inner li.addRect{
 	background: url(../img/rect.png) no-repeat;
 }
@@ -731,6 +737,6 @@ body{
 canvas{
 	width: 100%;
 	height: 100%;
-	
+
 }
 

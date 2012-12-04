@@ -19,7 +19,7 @@ void setup() {
 	size(width, height);
 	background(255);
 	smooth();
-	loop();  
+	//loop();  
 
 	shapes[shapeId] = new myShape(currentType, shapeId, 100,100, 100, 100);
 	shapes[shapeId].display();
@@ -37,7 +37,7 @@ void draw() {
 }
 
 void mousePressed() {
-
+	console.log("hello web!");
 	shapes[shapeId] = new myShape(currentType, shapeId, mouseX, mouseY, 0, 0);
 	shapes[shapeId].display();
 
