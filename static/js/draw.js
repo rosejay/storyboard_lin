@@ -133,21 +133,38 @@ $(document).ready(function(){
 
 			shapes[shapeId].shape.onMouseOver = mouseOverHandler;
 			shapes[shapeId].shape.onMouseOut = mouseOutHandler;
+			shapes[shapeId].shape.onMouseMove = mouseMoveHandler;
+
 			shapes[shapeId].shape.onPress = pressedHandler;
+			shapes[shapeId].shape.onClick = clickHandler;
 			shapeId ++;
 			isPressed = false;
 		}
 	}
 
+	function mouseMoveHandler(e){
+		if(isOver){
+			if(e.stageX>e.target.x+shapes[e.target.id].width/2-16&& e.stageX<shapes[e.target.id].width/2)
+				$("#canvas").addClass("resize");
+			else
+				$("#canvas").removeClass("resize");
+
+			console.log(e.stageX, e.target.x+shapes[e.target.id].width/2);
+		}
+
+	}
 	function mouseOverHandler(e) {
 		if(!isDrawing){
 			isOver = true;
-			e.target.scaleX = e.target.scaleY = e.target.scale*1.1;
+			var shadow = new createjs.Shadow("rgb(220,220,220)" , 2 , 2 , 5 );
+			e.target.shadow = shadow;
+			//e.target.scaleX = e.target.scaleY = e.target.scale*1.1;
 			stage.update();
 		}
 	}
 	function mouseOutHandler(e) {
 		if(!isDrawing){
+			e.target.shadow = null;
 			isOver = false;
 			e.target.scaleX = e.target.scaleY = e.target.scale;
 			stage.update();
@@ -168,6 +185,36 @@ $(document).ready(function(){
 
 	}
 
+	// toggle rotate and scale mode
+	function clickHandler(evt){
+		var html;
+		var i = evt.target.id;
+		var x = shapes[i].x-lineWidth/2;
+		var y = shapes[i].y-lineWidth/2;
+		var w = shapes[i].width + lineWidth;
+		var h = shapes[i].height + lineWidth;
+
+		html = "<canvas class='setcenter' id='popup' style='top:"+y+"px;left:"+x+"px;width:"+w+"px;height="+h+"px'></canvas>"
+		$("#dropzone").append(html);
+
+		var p = Processing("popup");
+		var canvas = document.getElementById("popup");
+		var context = canvas.getContext("2d");
+
+		p.size(shapes[i].width, shapes[i].height);
+		p.smooth();
+		p.noFill();
+		p.stroke(220,220,220);
+		p.strokeWeight(lineWidth);
+		p.rect(lineWidth/2,lineWidth/2, shapes[i].width-lineWidth, shapes[i].height-lineWidth);
+
+		//shapes[i].shape.visible = false;
+
+		$("#popup").resizable(); 
+		$("#popup").draggable(); 
+
+		$("#popup").css("top", 0).css("left",0);
+	}
 
 
 	function myShape(t,id,x,y,w,h){
@@ -191,7 +238,7 @@ $(document).ready(function(){
 		init: function(e){
 			this.shape = new createjs.Shape();
 			this.shape.graphics.beginFill("rgba(0,0,0,0)");
-			this.shape.graphics.setStrokeStyle(lineWidth,"square").beginStroke("rgba(200,200,200,0.5)");
+			this.shape.graphics.setStrokeStyle(lineWidth,"square").beginStroke("rgb(220,220,220)");
 			this.shape.x = e.stageX;
 			this.shape.y = e.stageY;
 			this.shape.id = this.id;
@@ -220,7 +267,7 @@ $(document).ready(function(){
 			
 			this.shape.graphics.clear();
 			this.shape.graphics.beginFill("rgba(0,0,0,0)");
-			this.shape.graphics.setStrokeStyle(lineWidth,"square").beginStroke("rgba(200,200,200,0.5)");
+			this.shape.graphics.setStrokeStyle(lineWidth,"square").beginStroke("rgb(220,220,220)");
 
 			this.width = this.maxX - this.minY;
 			this.height = this.maxY - this.minY;
@@ -259,7 +306,7 @@ $(document).ready(function(){
 			this.shape.graphics.clear();
 
 			this.shape.graphics.beginFill("rgba(0,0,0,0)");
-			this.shape.graphics.setStrokeStyle(lineWidth,"square").beginStroke("rgba(200,200,200,0.5)");
+			this.shape.graphics.setStrokeStyle(lineWidth,"square").beginStroke("rgb(220,220,220)");
 			if(this.type == "rect"){
 				this.shape.graphics.drawRect( - this.width/2, - this.height/2, this.width, this.height);
 			}
@@ -305,7 +352,7 @@ $(document).ready(function(){
 	function drawDash(x,y,w,h,shape){
 
 		shape.graphics.beginFill("rgba(0,0,0,0)");
-		shape.graphics.setStrokeStyle(lineWidth,"square").beginStroke("rgba(200,200,200,0.5)");
+		shape.graphics.setStrokeStyle(lineWidth,"square").beginStroke("rgb(220,220,220)");
 
 		var x1 = x;
 		var x2 = w;
@@ -342,7 +389,7 @@ $(document).ready(function(){
 	function drawArrow(x,y,w,h,shape){
 
 		shape.graphics.beginFill("rgba(0,0,0,0)");
-		shape.graphics.setStrokeStyle(lineWidth,"round").beginStroke("rgba(200,200,200,1)");
+		shape.graphics.setStrokeStyle(lineWidth,"round").beginStroke("rgb(220,220,220)");
 
 		var Radius = 2*lineWidth;
 		var endX = x+w;
@@ -367,8 +414,8 @@ $(document).ready(function(){
         var rightY = centerY - Radius * Math.sin((-angle -120) *(Math.PI/180))  ;
  
                   
-        shape.graphics.beginFill("rgba(200,200,200,1)");
-		shape.graphics.setStrokeStyle(1,"round").beginStroke("rgba(200,200,200,1)");
+        shape.graphics.beginFill("rgb(220,220,220)");
+		shape.graphics.setStrokeStyle(1,"round").beginStroke("rgb(220,220,220)");
 
         shape.graphics.moveTo(topX,topY);
         shape.graphics.lineTo(leftX,leftY);
