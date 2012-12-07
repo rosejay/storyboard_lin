@@ -2,23 +2,34 @@
 	$('#btn_page_next').css("top", (window.innerHeight - 120)/2);
 	$('#btn_page_prev').css("top", (window.innerHeight - 120)/2);
 
-	var index = 0;
-	var slideNum = -1;
+	var index = 0;          // current canvas index
+	var slideNum = -1;      // slides number
 
 
-	var canvas=[], stage=[];
+	var processingInstance;
 
+	var shapes;             // the draw object on canvas, replaced with an popup layer when mouseUp
+	var shapeNum = [];      // draw object number for each canvas
 
-	var currentID= -1;
-	var shapeId = [];
-	var shapes = new Array(new Array(),new Array());
-
-	var currentType = "";
+	var currentType = "";   // "rect" "arrow" "ellipse" "dash" "brush"
 	var lineWidth = 10; 	// line width
 
-	var isDrawing = false;  // if it is in drawing mode
-	var isPressed = false;
-	var isOver = false;
+	var isDrawMode = false;  // if it is in drawing mode
+	var isDrawing = false;   // if it is drawing now!
+
+	// append it inside each object
+	var $functionDiv = $("<div class='scaleControl'></div>\
+						<div class='deletePic'>\
+							<div class='deleteBtn'></div>\
+							<div class='text'>\
+								<span>Really?</span>\
+								<a click='' class='do_click'>Yes</a>\
+								<span>/</span>\
+								<a click='' class='cancel_click'>No</a>\
+							</div>\
+						</div>");
+
+
 
 	$('.addRect').click(function(e){
 		setDrawing($(this));
@@ -45,8 +56,16 @@
 		showDrawCanvas();
 		currentType = "brush";
 	});
+
+	$(".addCanvas").click(function(){
+		addSlides();
+	});
+
 	function showDrawCanvas(){
 		$(".drawCanvas").css("display","block");
+		var canvas = document.getElementById("canvas"+index);
+		processingInstance = new Processing(canvas, drawObj);
+		processingInstance.background(255,255,255,0);
 	}
 	function hideDrawCanvas(){
 		$(".drawCanvas").css("display","none");
@@ -54,12 +73,12 @@
 
 
 	function setDrawing(obj){
-		isDrawing = true;
+		isDrawMode = true;
 		resetToolbarStyle(obj);
 		obj.addClass("active");
 	}
 	function setUnDrawing(){
-		isDrawing = false;
+		isDrawMode = false;
 		resetToolbarStyle();
 	}
 	function resetToolbarStyle(){
@@ -69,20 +88,16 @@
 
 
 
-
-
-
 	var createSlide = (function(){
 
-		var width = 478;
-		var height = 478;
-
+		var width = 480;
+		var height = 480;
 
 		return function(num){
 
 			var $slide = $("<div id='dropzone"+num+"' class='wboard step slide rebuild' >\
 				<span class='slidenum' id='slidenum"+num+"'>"+numberTwo(num+1)+"</span>\
-				<canvas id='canvas"+num+"' width='"+width+"px' height='"+height+"px' resize class='drawCanvas' style='display:none'></canvas>\
+				<canvas resize class='drawCanvas' style='display:none'></canvas>\
 				</div>");
 			
 			if(slideNum == 0)
@@ -97,101 +112,129 @@
 				return n;
 			}
 
-			initStage(num);
+			shapeNum[num] = 0;
+
+
+			var tempcanvas = document.createElement('canvas');
+			tempcanvas.width = width;
+			tempcanvas.height = height;
+			tempcanvas.addClass("drawCanvas");
+			tempcanvas.id = "canvas"+num;
+
+			processingInstance = new Processing(tempcanvas, drawObj);
+
+			$slide.append(tempcanvas);
 
 			return $slide;
 		}
 
 	})();
-		
-	function initStage(num){
+	
+	
 			
-		// create stage and point it to the canvas:
-		canvas[num] = document.getElementById("canvas"+num);
+	function drawObj(processing){
 
-		//check to see if we are running in a browser with touch support
-		stage[index] = new createjs.Stage(canvas[num]);
+		processing.size( 480, 480 );
+		processing.smooth();
+		processing.background(255,255,255,0);
+		processing.stroke(220,220,220);
+		processing.strokeWeight(lineWidth);
+		processing.strokeCap(processing.SQUARE);
+		processing.noFill();
+		processing.noLoop();
 
-		// enable touch interactions if supported on the current device:
-		createjs.Touch.enable(stage[index]);
+		shapes = new MyShape(currentType, 0, 0, 0, 0);
 
-		// enabled mouse over / out events
-		stage[index].enableMouseOver(10);
-		stage[index].mouseMoveOutside = false; // keep tracking the mouse even when it leaves the canvas
+		processing.draw = function (){
 
-		shapeId[num] = 0;
+			setProcessingStyle(processing);
 
-		stage[index].onMouseDown = function(evt){
-
-			if(!isOver && isDrawing){
-				isPressed = true;
-
-				shapes[index][shapeId[index]] = new myShape(currentType, shapeId[index], 
-										evt.stageX, evt.stageY, 0, 0);
-				
-				if(currentType == "brush"){
-					shapes[index][shapeId[index]].arrayX[0] = evt.stageX;
-					shapes[index][shapeId[index]].arrayY[0] = evt.stageY;
-				}
-
-				console.log("d",shapeId[index]);
-
-
-				shapes[index][shapeId[index]].init(evt);
+			switch(currentType){
+				case "rect":
+					processing.rect(shapes.x,shapes.y,shapes.width,shapes.height);
+					break;
+				case "ellipse":
+					processing.ellipse(shapes.x+shapes.width/2,
+									   shapes.y+shapes.height/2,
+									   shapes.width,
+									   shapes.height);
+					break;
+				case "arrow":
+					drawArrow(shapes.x,shapes.y,shapes.width,shapes.height,processing);
+					break;
+				case "brush":
+					drawBrush(shapes.arrayX, shapes.arrayY,processing);
+					break;
+				case "dash":
+					drawDash(shapes.x,shapes.y,shapes.width,shapes.height,processing);
+					break;
 			}
-				
-		};
-		stage[index].onMouseMove = function(evt){
-			if(isPressed && !isOver && isDrawing){
+
+		}
+		processing.mousePressed = function () {
+			if(isDrawMode){
+				isDrawing = true;
+
 				if(currentType == "brush"){
-					shapes[index][shapeId[index]].setArray(evt.stageX,evt.stageY);
-
-				}
-				else{
-					shapes[index][shapeId[index]].width = evt.stageX - shapes[index][shapeId[index]].x;
-					shapes[index][shapeId[index]].height = evt.stageY - shapes[index][shapeId[index]].y;
+					shapes.arrayX[0] = processing.mouseX;
+					shapes.arrayY[0] = processing.mouseY;
 				}
 
-				shapes[index][shapeId[index]].display();
-				stage[index].update();
-			}
-				
-		};
-		stage[index].onMouseUp = function(evt){
-
-			hideDrawCanvas();
-
-			if(!isOver && isDrawing){
-				setUnDrawing();
-				shapes[index][shapeId[index]].shape.scaleX = shapes[index][shapeId[index]].shape.scaleY = shapes[index][shapeId[index]].shape.scale = 1;
-				
-				if(currentType == "brush")
-					shapes[index][shapeId[index]].reDisplay();
-
-				if(currentType == "rect" || currentType == "ellipse" || currentType == "brush")
-					shapes[index][shapeId[index]].initHit();
-
-
-				shapes[index][shapeId[index]].shape.onMouseOver = mouseOverHandler;
-				shapes[index][shapeId[index]].shape.onMouseOut = mouseOutHandler;
-				shapes[index][shapeId[index]].shape.onMouseMove = mouseMoveHandler;
-
-				shapes[index][shapeId[index]].shape.onPress = pressedHandler;
-				shapes[index][shapeId[index]].shape.onClick = clickHandler;
-				shapeId[index] ++;
-				isPressed = false;
+				shapes.init(currentType, processing.mouseX, processing.mouseY);
 			}
 		}
+		processing.mouseDragged = function () {
 
+			if(isDrawMode && processing.mousePressed){
+
+				if(currentType == "brush"){
+					shapes.setArray(processing.mouseX, processing.mouseY);
+				}
+				else{
+					shapes.setWH(processing.mouseX, processing.mouseY);
+				}
+				processing.redraw();
+				//shapes.display();
+			}
+		}
+		processing.mouseReleased = function () {
+			hideDrawCanvas();
+
+			if(isDrawMode){
+
+				if(currentType == "brush"){
+					shapes.setArray(processing.mouseX, processing.mouseY);
+				}
+				else{
+					shapes.setWH(processing.mouseX, processing.mouseY);
+				}
+
+				setUnDrawing();
+
+				if(currentType == "brush")
+					shapes.reDisplay();
+				else if(currentType == "rect" || currentType == "ellipse")
+					shapes.reDisplayBox();
+				
+				isDrawing = false;
+
+				// popup a draw object
+				var $html = createDrawObject(shapeNum[index],shapes);
+
+				$html.insertBefore("#canvas"+index);
+
+				shapeNum[index] ++;
+			}
+		}
 
 	}
 
 
+
+
 	addSlides();
 
-	$(".addCanvas").click(function(){
-		addSlides();
-	});
+	
 
 	function addSlides(){
 		slideNum++;
@@ -203,9 +246,6 @@
 		if(slideNum > 0){
 			nextSlide();
 		}
-		else if(slideNum == 0){
-			initStage(0);
-		}
 
 /*
 			$slide.bind('dragenter', dragStyle, false);
@@ -213,11 +253,9 @@
 			$slide.bind('dragleave', removeDragStyle, false);
 			$slide.bind('drop', droppedImage, false);
 
-
+			// 这样写不行= =
 			
-
 			*/
-
 
 
 		document.getElementById('dropzone'+index).addEventListener('dragenter', dragStyle);
@@ -259,14 +297,17 @@
 		function dragStyle(e){
 			e.stopPropagation();
 			e.preventDefault();
-			$(".dropzone"+index).addClass('rounded');
-			$(".dropzone"+index).css("z-index",100);
+
+			if ( $("#tip").length == 0 )
+				$("<p id='tip'>Drag & drop image from left list or your disk folders</p>").insertBefore($("#canvas"+index));
+			
+			$("#dropzone"+index).addClass('rounded').css("z-index",100);
 		}
 		function removeDragStyle(e){
 			e.stopPropagation();
 			e.preventDefault();
-			$(".dropzone"+index).removeClass('rounded');
-			$(".dropzone"+index).css("z-index",0);
+			$("#tip").remove();
+			$("#dropzone"+index).removeClass('rounded').css("z-index",0);
 		}
 
 		$('#dropzone'+index).dblclick(function(e){
@@ -305,37 +346,16 @@
 				// image located according current cursor position
 				// cursor position is the center of a image
 				$box.css({
-					left : (x-img.width/2)+'px',
+					left : (x-img.width/2) + 'px',
 					top : (y-img.height/2) + 'px'
 				})
 			}
 			img.src= src;
-			/*
-			if (isLeftShow)
-				x -= 250;
-			*/
+
 			// imageBox templates
 			var $box = $("<div id='imgBox"+imageId+"' style='position:absolute;' class='img-box'></div>");
 			$box.append(img);
-			$box.append("<div class='scaleControl'></div>\
-						<div class='deletePic'>\
-							<div class='deleteBtn'></div>\
-							<div class='text'>\
-								<span>Really?</span>\
-								<a click='' class='do_click'>Yes</a>\
-								<span>/</span>\
-								<a click='' class='cancel_click'>No</a>\
-							</div>\
-						</div>");
-
-
-			/**
-			 * delete an image
-			 */
-			$box.find('.do_click').click(function(){
-				deleteObject = $box;
-				$box.remove();
-			});	    
+			$box.append($functionDiv);
 
 			/**
 			 * drag an image
@@ -345,7 +365,6 @@
 	                
 	            }
 	        });
-
 
 			imageId++;
 
@@ -628,6 +647,86 @@
 	})()
 
 
+	var createDrawObject = (function(){
+
+		return function(id,shape){
+
+			var x = shape.x;
+			var y = shape.y;
+			var w = shape.width;
+			var h = shape.height;
+
+			$box = $("<div class='draw-box setcenter' id='drawObject-"+index+"-"+id+"' style='position:absolute; top:"+(y-lineWidth/2)+"px;left:"+(x-lineWidth/2)+"px;'></div>");
+			//var canvas = "<canvas class='setcenter canvas' id='canvas-"+index+"-"+id+"' ></canvas>"
+
+			var tempcanvas = document.createElement('canvas');
+			processingInstance = new Processing(tempcanvas, drawObj);
+
+			function drawObj(processing){
+
+				// trick for arrow and dash
+				if(shape.type == "arrow" || shape.type == "dash"){
+					
+					var x1, y1, w1, h1;
+					var xBox, yBox;
+
+					if (w<0) { w1 = -w; x1 = -w; xBox = x+w-lineWidth*2; }
+					else{ w1 = w; x1 = 0; xBox = x-lineWidth*2; }
+
+					if (h<0) { h1 = -h; y1 = -h; yBox = y+h-lineWidth*2; }
+					else{ h1 = h; y1 = 0; yBox = y-lineWidth*2; }
+					$box.css("left",xBox).css("top",yBox);
+
+					processing.size( w1+lineWidth*4, h1+lineWidth*4 ); // init processing size
+					$(tempcanvas).css("width",w1+lineWidth*4).css("height",h1+lineWidth*4);
+ 				}
+ 				else{
+					processing.size( w+lineWidth, h+lineWidth ); // init processing size
+ 					$(tempcanvas).css("width",w+lineWidth).css("height",h+lineWidth);
+				}
+
+ 				$(tempcanvas).resizable();
+
+				setProcessingStyle(processing);
+
+				switch(shape.type){
+					case "rect":
+						processing.rect(lineWidth/2,lineWidth/2, w, h);
+						break;
+					case "ellipse":
+						processing.ellipse(lineWidth/2+w/2,lineWidth/2+h/2, w, h);
+						break;
+					case "arrow":
+						drawArrow(x1+lineWidth*2,y1+lineWidth*2,w,h,processing);
+						break;
+					case "brush":
+						drawBrush(shape.arrayX, shape.arrayY,processing);
+						break;
+					case "dash":
+						drawDash(x1+lineWidth*2,y1+lineWidth*2,w,h,processing);
+						break;
+				}
+				
+			}
+
+			$box.append(tempcanvas);
+			$box.append($functionDiv);
+			processingInstance = null;
+			/**
+			 * drag an image
+			 */
+			$box.draggable({
+	            start: function() {
+	                
+	            }
+	        });
+
+	        
+
+	        return $box;
+		}
+	})()
+
 
 
 
@@ -639,16 +738,19 @@
 		preSlide();
 	});
 
+	/**
+	 * keyboard control pre & next
+	 */
 	$(document).keydown(function(e){ 
+
 		var code = e.keyCode;
-		if (code === 33 || code == 37 || code == 38/*pg up/ left/ up*/) {
+		if (index!=0 && (code === 33 || code == 37 || code == 38)/*pg up/ left/ up*/) {
 			preSlide();
 		}
-		else if (code === 32 || code === 34 || code == 39 || code == 40/*space/ pg down/ right/ down*/) {
+		else if (index<slideNum && (code === 32 || code === 34 || code == 39 || code == 40)/*space/ pg down/ right/ down*/) {
 			nextSlide();
 		}
 	});
-
 
 	function nextSlide(){
 
@@ -666,8 +768,7 @@
 			$('#slide .slides .slide:eq(' + i + ')').addClass("future").css("z-index",10);
 		
 		checkPreNextBtn(index);
-		setindex(index);
-		
+
 	}
 	function preSlide(){
 		$('#slide .slides .slide').removeClass("present");
@@ -684,13 +785,8 @@
 			$('#slide .slides .slide:eq(' + i + ')').addClass("past").css("z-index",10);
 
 		checkPreNextBtn(index);
-		setindex(index);
 
-
-	}
-	function setindex(a){
-
-	}		
+	}	
 	function checkPreNextBtn(a){
 		if(a == slideNum){
 			$('#btn_page_next').hide();
@@ -714,200 +810,46 @@
 
 
 
+	function drawDash(x,y,w,h,processing){
 
-
-
-
-
-
-
-
-
-	function stageMouseDown(evt){
-		console.log("s");
-		if(!isOver && isDrawing){
-			isPressed = true;
-
-			shapes[index][shapeId[index]] = new myShape(currentType, shapeId[index], 
-									evt.stageX, evt.stageY, 0, 0);
-			
-			if(currentType == "brush"){
-				shapes[index][shapeId[index]].arrayX[0] = evt.stageX;
-				shapes[index][shapeId[index]].arrayY[0] = evt.stageY;
-			}
-
-			shapes[index][shapeId[index]].init(evt);
-		}
-			
-	};
-	function stageMouseMove(evt){
-		if(isPressed && !isOver && isDrawing){
-			if(currentType == "brush"){
-				shapes[index][shapeId[index]].setArray(evt.stageX,evt.stageY);
-
-			}
-			else{
-				shapes[index][shapeId[index]].width = evt.stageX - shapes[index][shapeId[index]].x;
-				shapes[index][shapeId[index]].height = evt.stageY - shapes[index][shapeId[index]].y;
-			}
-
-			shapes[index][shapeId[index]].display();
-			stage[index].update();
-		}
-			
-	};
-	function stageMouseUp(evt){
-
-		//hideDrawCanvas();
-
-		if(!isOver && isDrawing){
-			setUnDrawing();
-			shapes[index][shapeId[index]].shape.scaleX = shapes[index][shapeId[index]].shape.scaleY = shapes[index][shapeId[index]].shape.scale = 1;
-			
-			if(currentType == "brush")
-				shapes[index][shapeId[index]].reDisplay();
-
-			if(currentType == "rect" || currentType == "ellipse" || currentType == "brush")
-				shapes[index][shapeId[index]].initHit();
-
-
-			shapes[index][shapeId[index]].shape.onMouseOver = mouseOverHandler;
-			shapes[index][shapeId[index]].shape.onMouseOut = mouseOutHandler;
-			shapes[index][shapeId[index]].shape.onMouseMove = mouseMoveHandler;
-
-			shapes[index][shapeId[index]].shape.onPress = pressedHandler;
-			shapes[index][shapeId[index]].shape.onClick = clickHandler;
-			shapeId[index] ++;
-			isPressed = false;
-		}
-	}
-
-	function mouseMoveHandler(e){
-		if(isOver){
-			if(e.stageX>e.target.x+shapes[index][e.target.id].width/2-16&& e.stageX<shapes[index][e.target.id].width/2)
-				$("#canvas").addClass("resize");
-			else
-				$("#canvas").removeClass("resize");
-
-			console.log(e.stageX, e.target.x+shapes[index][e.target.id].width/2);
-		}
-
-	}
-	function mouseOverHandler(e) {
-		if(!isDrawing){
-			isOver = true;
-			var shadow = new createjs.Shadow("rgb(220,220,220)" , 2 , 2 , 5 );
-			e.target.shadow = shadow;
-			//e.target.scaleX = e.target.scaleY = e.target.scale*1.1;
-			stage[index].update();
-		}
-	}
-	function mouseOutHandler(e) {
-		if(!isDrawing){
-			e.target.shadow = null;
-			isOver = false;
-			e.target.scaleX = e.target.scaleY = e.target.scale;
-			stage[index].update();
-		}
-	}
-	function pressedHandler(evt){
-
-		if(isOver && !isDrawing){
-			//container.addChild(evt.target);
-			var offset = {x:evt.target.x-evt.stageX, y:evt.target.y-evt.stageY};
-
-			evt.onMouseMove = function(e) {
-				e.target.x = e.stageX+offset.x;
-				e.target.y = e.stageY+offset.y;
-				stage[index].update();
-			}
-		}
-
-	}
-
-	// toggle rotate and scale mode
-	function clickHandler(evt){
-		var html;
-		var i = evt.target.id;
-		var x = shapes[index][i].x-lineWidth/2;
-		var y = shapes[index][i].y-lineWidth/2;
-		var w = shapes[index][i].width + lineWidth;
-		var h = shapes[index][i].height + lineWidth;
-
-		$html = "<canvas class='setcenter' id='popup' style='top:"+y+"px;left:"+x+"px;width:"+w+"px;height="+h+"px'></canvas>"
-
-		$html.insertBefore("#canvas"+index);
-
-		var p = Processing("popup");
-		var canvas = document.getElementById("popup");
-		var context = canvas.getContext("2d");
-
-		p.size(shapes[index][i].width, shapes[index][i].height);
-		p.smooth();
-		p.noFill();
-		p.stroke(220,220,220);
-		p.strokeWeight(lineWidth);
-		p.rect(lineWidth/2,lineWidth/2, shapes[index][i].width-lineWidth, shapes[index][i].height-lineWidth);
-
-		//shapes[index][i].shape.visible = false;
-
-		$("#popup").resizable(); 
-		$("#popup").draggable(); 
-
-		$("#popup").css("top", 0).css("left",0);
-	}
-
-
-
-	function drawDash(x,y,w,h,shape){
-
-		shape.graphics.beginFill("rgba(0,0,0,0)");
-		shape.graphics.setStrokeStyle(lineWidth,"square").beginStroke("rgb(220,220,220)");
+		setProcessingStyle(processing);
 
 		var x1 = x;
-		var x2 = w;
 		var y1 = y;
-		var y2 = h;
 
 		var length = Math.sqrt((w)*(w) + (h)*(h));
 
 		var units = length*1.0/(lineWidth*3);
-		var dashSpaceRatio = 0.3;
-		
-		var dashW = (w/units*1.0)*dashSpaceRatio;
-		var spaceW = (w/units*1.0)-dashW;
-		var dashH = (h/units*1.0)*dashSpaceRatio;
-		var spaceH = (h/units*1.0)-dashH;
+		var dashSpaceRatio = 0.6;
 
-		shape.graphics.moveTo(x1, y1);
-		while (length > 0)
-		{
-			x1 += dashW;
-			y1 += dashH;
-			shape.graphics.lineTo(x1, y1);
+		var divW = w/units*1.0;
+		var divH = h/units*1.0;
 
-			x1 += spaceW;
-			y1 += spaceH;
-			shape.graphics.moveTo(x1, y1);
+		var dashW = divW*dashSpaceRatio;
+		var dashH = divH*dashSpaceRatio;
 
+		while (length > 0){
+
+			processing.line(x1, y1, x1+dashW, y1+dashH);
+
+			x1 += divW;
+			y1 += divH;
 			length -= lineWidth*3;
 		}
-		shape.graphics.lineTo(x1, y1);
 
 	}
 
-	function drawArrow(x,y,w,h,shape){
+	function drawArrow(x,y,w,h,processing){
+		setProcessingStyle(processing);
 
-		shape.graphics.beginFill("rgba(0,0,0,0)");
-		shape.graphics.setStrokeStyle(lineWidth,"round").beginStroke("rgb(220,220,220)");
+		processing.strokeCap(processing.ROUND);
 
 		var Radius = 2*lineWidth;
 		var endX = x+w;
 		var endY = y+h;
-		var mouseX = 
 		// line
-		shape.graphics.moveTo(x, y);
-		shape.graphics.lineTo(endX, endY);
+		processing.strokeWeight(lineWidth);
+		processing.line(x, y, endX, endY);
 
 		// arrow
         var angle = Math.atan2(h,w)*(180/Math.PI);
@@ -924,30 +866,49 @@
         var rightY = centerY - Radius * Math.sin((-angle -120) *(Math.PI/180))  ;
  
                   
-        shape.graphics.beginFill("rgb(220,220,220)");
-		shape.graphics.setStrokeStyle(1,"round").beginStroke("rgb(220,220,220)");
+        processing.fill(220,220,220);
+		processing.strokeWeight(1);
 
-        shape.graphics.moveTo(topX,topY);
-        shape.graphics.lineTo(leftX,leftY);
-        shape.graphics.lineTo(centerX,centerY);
-        shape.graphics.lineTo(rightX,rightY);
-        shape.graphics.lineTo(topX,topY);
+		processing.beginShape();
+		processing.vertex(topX,topY);
+		processing.vertex(leftX,leftY);
+		processing.vertex(centerX,centerY);
+		processing.vertex(rightX,rightY);
+		processing.vertex(topX,topY);
+
+		processing.endShape();
 
 	}
+	function drawBrush(arrayX,arrayY,processing){
+		setProcessingStyle(processing);
 
+		processing.beginShape();
+		processing.curveVertex(arrayX[0],arrayY[0]);
 
+		for(var i = 0; i<arrayX.length; i++)
+			processing.curveVertex(arrayX[i],arrayY[i]);
+		
+		processing.curveVertex(arrayX[i-1],arrayY[1-1]);
+		processing.endShape();
+	}
 
+	function setProcessingStyle(processing){
 
-	function myShape(t,id,x,y,w,h){
+		processing.background(255,255,255,0);
+		processing.stroke(220,220,220);
+		processing.strokeWeight(lineWidth);
+		processing.strokeCap(processing.SQUARE);
+		processing.noFill();
+		processing.noLoop();
+	}
+
+	function MyShape(t,x,y,w,h){
 
 		this.type = t;
-		this.id = id;
 		this.x = x;
 		this.y = y;
 		this.width = w;
 		this.height = h;
-		this.shape;
-		this.hit;
 		this.arrayX = [];
 		this.arrayY = [];
 		this.maxX = 0;
@@ -955,118 +916,58 @@
 		this.minX = 100000;
 		this.minY = 100000;
 	}
-	myShape.prototype = {
-		init: function(e){
-			this.shape = new createjs.Shape();
-			this.shape.graphics.beginFill("rgba(0,0,0,0)");
-			this.shape.graphics.setStrokeStyle(lineWidth,"square").beginStroke("rgb(220,220,220)");
-			this.shape.x = e.stageX;
-			this.shape.y = e.stageY;
-			this.shape.id = this.id;
-			if(this.type == "rect"){
-				this.shape.graphics.drawRect(0, 0, 0, 0);
-			}
-			else if(this.type == "ellipse"){
-				this.shape.graphics.drawEllipse(0, 0, 0, 0);
-			}
-			else if (this.type == "arrow") {
-				drawArrow(0,0,0,0,this.shape);
-			}
-			else if(this.type == "dash"){
-				drawDash(0,0,0,0,this.shape);
-			}
-			else if (this.type == "brush") {
-				this.shape.x = 0;
-				this.shape.y = 0;
-			}
-			stage[index].addChild(this.shape);
-			stage[index].update();
-			
+	MyShape.prototype.init = function(t,x,y){
+		this.type = t;
+		this.x = x;
+		this.y = y;
+	};
+	MyShape.prototype.reDisplay = function(){
+		this.width = this.maxX - this.minX;
+		this.height = this.maxY - this.minY;
+		this.x = this.minX;
+		this.y = this.minY; 
 
-		},
-		reDisplay: function(){
-			
-			this.shape.graphics.clear();
-			this.shape.graphics.beginFill("rgba(0,0,0,0)");
-			this.shape.graphics.setStrokeStyle(lineWidth,"square").beginStroke("rgb(220,220,220)");
-
-			this.width = this.maxX - this.minY;
-			this.height = this.maxY - this.minY;
-			this.x = this.width/2;
-			this.y = this.height/2; 
-			this.shape.x = this.width/2;
-			this.shape.y = this.height/2;
-
-			for(var i = 0; i<this.arrayX.length; i++){
-				this.arrayX[i] -= this.width/2;
-				this.arrayY[i] -= this.height/2;
-			}
-			for(var i = 0; i<this.arrayX.length-1; i++){
-				this.shape.graphics.moveTo(this.arrayX[i], this.arrayY[i])
-							  .lineTo(this.arrayX[i+1], this.arrayY[i+1]);
-			}
-			stage[index].update();
-		},
-		setArray: function(mx,my){
-
-			var i = this.arrayX.length;
-			this.arrayX[i] = mx;
-			this.arrayY[i] = my;
-
-			if(mx>this.maxX)
-				this.maxX = mx;
-			if(mx<this.minX)
-				this.minX = mx;
-			if(my>this.maxY)
-				this.maxY = my;
-			if(my<this.minY)
-				this.minY = my;
-
-		},
-		display: function(){
-			this.shape.graphics.clear();
-
-			this.shape.graphics.beginFill("rgba(0,0,0,0)");
-			this.shape.graphics.setStrokeStyle(lineWidth,"square").beginStroke("rgb(220,220,220)");
-			if(this.type == "rect"){
-				this.shape.graphics.drawRect( - this.width/2, - this.height/2, this.width, this.height);
-			}
-			else if (this.type == "ellipse") {
-				this.shape.graphics.drawEllipse( - this.width/2, - this.height/2, this.width, this.height);
-			}
-			else if(this.type == "arrow"){
-				drawArrow( - this.width/2, - this.height/2, this.width, this.height ,this.shape);
-			}
-			else if(this.type == "dash"){
-				drawDash( - this.width/2, - this.height/2, this.width, this.height ,this.shape);
-			}
-			else if(this.type == "brush"){
-				for(var i = 0; i<this.arrayX.length-1; i++){
-					this.shape.graphics.moveTo(this.arrayX[i], this.arrayY[i])
-								  .lineTo(this.arrayX[i+1], this.arrayY[i+1]);
-				}
-			}
-			if(this.type == "brush"){
-				this.shape.x = 0;
-				this.shape.y = 0;
-			}
-			else{
-				this.shape.x = this.x + this.width/2;
-				this.shape.y = this.y + this.height/2;
-			}
-			
-			stage[index].update();
-
-		},
-		initHit: function() {
-			this.hit = new createjs.Shape();
-			if(this.type == "rect" || this.type == "brush"){
-				this.hit.graphics.beginFill("#000").drawRect( - this.width/2, - this.height/2, this.width, this.height);
-			}
-			else if (this.type == "ellipse") {
-				this.hit.graphics.beginFill("#000").drawEllipse( - this.width/2, - this.height/2, this.width, this.height);
-			}
-
-			this.shape.hitArea = this.hit;
+		for(var i = 0; i<this.arrayX.length; i++){
+			this.arrayX[i] -= this.x - lineWidth/2;
+			this.arrayY[i] -= this.y - lineWidth/2;
 		}
 	};
+	MyShape.prototype.reDisplayBox = function(){
+		if(this.width<0){
+			this.x += this.width;
+			this.width = -this.width;
+		}
+		if(this.height<0){
+			this.y += this.height;
+			this.height = -this.height;
+		}
+
+	}
+	MyShape.prototype.setArray = function(x,y){
+		var i = this.arrayX.length;
+		this.arrayX[i] = x;
+		this.arrayY[i] = y;
+
+		if(x>this.maxX)
+			this.maxX = x;
+		if(x<this.minX)
+			this.minX = x;
+		if(y>this.maxY)
+			this.maxY = y;
+		if(y<this.minY)
+			this.minY = y;
+	};
+	MyShape.prototype.setWH = function(x,y){
+		this.width = x - this.x;
+		this.height = y - this.y;
+	};
+
+
+
+	/**
+	 * delete an object
+	 */
+	$('.do_click').live("click", function(){ 
+		
+		$(this).parent().parent().parent().remove(); 
+	});	 

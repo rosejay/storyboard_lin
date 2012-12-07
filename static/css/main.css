@@ -250,19 +250,23 @@ body{
 	background: rgba(255,255,255,0);
 }
 
-.img-box{
+.img-box, .draw-box{
 	position: absolute;
 	z-index:0;
 	display:inline-block;
 }
-.img-box:hover{
+.img-box:hover, .draw-box:hover{
 	-moz-box-shadow: 0 0 5px #ccc;
 	-webkit-box-shadow: 0 0 5px #ccc;
 	box-shadow: 0 0 5px #ccc;
 }
 .img-box:hover .scaleControl,
+.draw-box:hover .scaleControl, 
 .img-box:hover .deletePic,
-.img-box:hover .timelineControl{
+.draw-box:hover .deletePic,
+.img-box:hover .timelineControl,
+.draw-box:hover .timelineControl{
+
 	opacity:1.0;
 
 	transition:all 0.5s;
@@ -758,12 +762,7 @@ body{
 
 
 
-.slide.rounded {
-	-webkit-box-shadow: inset 0px 0px 15px #ccc;
-	-moz-box-shadow: inset 0px 0px 15px #ccc;
-	-o-box-shadow: inset 0px 0px 15px #ccc;
-	box-shadow: inset 0px 0px 15px #ccc;
-}
+
 
 #slide{
 	z-index:0;
@@ -825,8 +824,8 @@ body{
 #slide .slides > .slide{
 
     /*background-color: #eee;*/
-    width:478px;
-    height: 478px;
+    width:480px;
+    height: 480px;
     -webkit-box-shadow: 0px 0px 7px #ccc;
 	-moz-box-shadow: 0px 0px 7px #ccc;
 	-o-box-shadow: 0px 0px 7px #ccc;
@@ -861,6 +860,12 @@ body{
 	    -ms-transform: translate3d(100%, 0, 0) rotateY(90deg) translate3d(100%, 0, 0);
 	        transform: translate3d(100%, 0, 0) rotateY(90deg) translate3d(100%, 0, 0);
 }
+#slide .slides > .slide.rounded {
+	-webkit-box-shadow: inset 0px 0px 15px #ccc;
+	-moz-box-shadow: inset 0px 0px 15px #ccc;
+	-o-box-shadow: inset 0px 0px 15px #ccc;
+	box-shadow: inset 0px 0px 15px #ccc;
+}
 
 #btn_page_next, #btn_page_prev{ color: #DDD; cursor:pointer; display:block;height:120px;width:80px;position:absolute; z-index:3; }
 #btn_page_next:hover, #btn_page_prev:hover{ color: #999; }
@@ -873,18 +878,33 @@ body{
 	z-index: 900;
 	position: absolute;
 	top: 0;
-	right: 0;
+	right: 15px;
 	background: #3cccff;
-	font-size: 12px;
-	width: 24px;
-	height: 24px;
-	line-height: 24px;
+	font-size: 20px;
+	width: 40px;
+	height: 40px;
+	line-height: 40px;
 	text-align: center;
 	color: #fff;
 }
 .drawCanvas{
-	position: relative;
+	position: absolute;
 	top: 0;
 	left: 0;
 	cursor: crosshair; 
+}
+
+.draw-box .canvas{
+	width: 100%;
+	height: 100%;
+	position: relative;
+	top: 0;
+	left: 0;
+}
+#tip{
+	position: absolute;
+	top: 50%;
+	left: 30px;
+	color: #ddd;
+	font-size: 18px;
 }
