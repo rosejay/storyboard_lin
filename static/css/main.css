@@ -335,12 +335,15 @@ body{
 	color: #fff;
 	opacity:0;
 }
+.draw-box .deletePic{
+	color: #bbb;
+}
 .deletePic:hover{
 	width:185px;
 }
 
 .deletePic .deleteBtn{
-	background: url(../img/close.png);
+	background: url(../img/close-w.png);
 	width: 40px;
 	height: 40px;
 	position: absolute;
@@ -350,13 +353,24 @@ body{
 }
 .deletePic .text{
 	position: absolute;
-	left: 50px;
+	left: 45px;
 	top: 10px;
 	float: left;
 	width: 160px;
 	height: 40px;
 	display: block;
+	padding-left: 5px;
 }
+.img-box .deletePic .text{
+	background: rgba(255,255,255,0);
+}
+.draw-box .deletePic .text{
+	background: rgba(255,255,255,0.8);
+}
+.draw-box .deletePic .deleteBtn{
+	background: url(../img/close.png);
+}
+
 .deletePic .text span, .deletePic .text a{
 	float: left;
 	display: block;
@@ -368,12 +382,17 @@ body{
 	color: #fff;
 	font-weight: bold;
 }
+.draw-box .deletePic .text a{
+	color: #bbb;
+}
 .deletePic .text a:hover{
 	color: #fff;
 	text-decoration: underline;
-
 }
-
+.draw-box .deletePic .text a:hover{
+	color: #aaa;
+	text-decoration: underline;
+}
 
 #imgPreview{
 	z-index: 10000;
@@ -836,6 +855,10 @@ body{
     background: rgba(255,255,255,1);
 	overflow-x: hidden;
 	overflow-y: hidden;
+	cursor: default;
+}
+#slide .slides > .slide.cursor{
+	cursor: crosshair;
 }
 #slide .slides > .slide.past {
 	display: block;
@@ -891,7 +914,6 @@ body{
 	position: absolute;
 	top: 0;
 	left: 0;
-	cursor: crosshair; 
 }
 
 .draw-box .canvas{

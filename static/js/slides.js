@@ -18,7 +18,7 @@
 	var isDrawing = false;   // if it is drawing now!
 
 	// append it inside each object
-	var $functionDiv = $("<div class='scaleControl'></div>\
+	var functionDiv = "<div class='scaleControl'></div>\
 						<div class='deletePic'>\
 							<div class='deleteBtn'></div>\
 							<div class='text'>\
@@ -27,48 +27,48 @@
 								<span>/</span>\
 								<a click='' class='cancel_click'>No</a>\
 							</div>\
-						</div>");
+						</div>";
 
 
 
-	$('.addRect').click(function(e){
-		setDrawing($(this));
-		showDrawCanvas();
-		currentType = "rect";
-	});
-	$('.addArrow').click(function(){
-		setDrawing($(this));
-		showDrawCanvas();
-		currentType = "arrow";
-	});
-	$('.addEllipse').click(function(){
-		setDrawing($(this));
-		showDrawCanvas();
-		currentType = "ellipse";
-	});
-	$('.addDash').click(function(){
-		setDrawing($(this));
-		showDrawCanvas();
-		currentType = "dash";
-	});
-	$('.addBrush').click(function(){
-		setDrawing($(this));
-		showDrawCanvas();
-		currentType = "brush";
+	$('.toolbar ul li.tool').click(function(e){
+		if($(this).hasClass("active")){
+			setUnDrawing();
+		}
+		else{
+			setDrawing($(this));
+			showDrawCanvas();
+
+			if ($(this).hasClass("addRect"))
+				currentType = "rect";
+			else if ($(this).hasClass("addArrow"))
+				currentType = "arrow";
+			else if ($(this).hasClass("addEllipse"))
+				currentType = "ellipse";
+			else if ($(this).hasClass("addDash"))
+				currentType = "dash";
+			else if ($(this).hasClass("addBrush"))
+				currentType = "brush";
+		}
+			
 	});
 
 	$(".addCanvas").click(function(){
+		setUnDrawing();
 		addSlides();
 	});
 
 	function showDrawCanvas(){
 		$(".drawCanvas").css("display","block");
+		$(".slide.present").addClass("cursor");
 		var canvas = document.getElementById("canvas"+index);
 		processingInstance = new Processing(canvas, drawObj);
 		processingInstance.background(255,255,255,0);
 	}
 	function hideDrawCanvas(){
 		$(".drawCanvas").css("display","none");
+		$(".slide.present").removeClass("cursor");
+		processingInstance = null;
 	}
 
 
@@ -219,9 +219,15 @@
 				isDrawing = false;
 
 				// popup a draw object
-				var $html = createDrawObject(shapeNum[index],shapes);
+				if(shapes.width!=0){
+					var $html = createDrawObject(shapeNum[index],shapes);
+					$html.insertBefore("#canvas"+index);
+				}
+				else{
 
-				$html.insertBefore("#canvas"+index);
+				}
+
+				
 
 				shapeNum[index] ++;
 			}
@@ -355,7 +361,7 @@
 			// imageBox templates
 			var $box = $("<div id='imgBox"+imageId+"' style='position:absolute;' class='img-box'></div>");
 			$box.append(img);
-			$box.append($functionDiv);
+			$box.append(functionDiv);
 
 			/**
 			 * drag an image
@@ -710,8 +716,8 @@
 			}
 
 			$box.append(tempcanvas);
-			$box.append($functionDiv);
-			processingInstance = null;
+			$box.append(functionDiv);
+			
 			/**
 			 * drag an image
 			 */
