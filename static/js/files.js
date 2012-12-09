@@ -1,4 +1,9 @@
-
+//
+//  files.js
+//  get files and folders from server
+//
+//  
+//
 
 	var dirs = new Array(new Array(), new Array()); // data of image dirs and folders 
 	var folders = new Array(); // folder names

@@ -26,6 +26,7 @@ s{text-decoration:none;}
 :focus{outline:0;}
 .clear{clear:both;}
 div{display: block;}
+::selection, ::-moz-selection { color: white; background: #ccf4ff; text-shadow: none; }
 /*css3*/
 .br10{-moz-border-radius:10px;-webkit-border-radius:10px;border-radius:10px;}
 .br5{-moz-border-radius:5px;-webkit-border-radius:5px;border-radius:5px;}
@@ -89,7 +90,7 @@ body{
 	position: relative;
 	height: 100%;
 }
-
+/* preview */
 .canvas-preview{
 	position: relative;
 	width: 100px;
@@ -99,8 +100,47 @@ body{
 	-moz-box-shadow: 0px 0px 7px #ccc;
 	-o-box-shadow: 0px 0px 7px #ccc;
 	box-shadow: 0px 0px 7px #ccc;
+
+	/* flexbox setup */
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	display: -moz-box;
+	-moz-box-orient: vertical;
+	display: box;
+	box-orient: vertical;
+}
+.canvas-preview .preview-box{
+	width: 100%;
+	-webkit-box-flex: 1;
+  	-moz-box-flex: 1;
+  	box-flex: 1;
+  	overflow-x: hidden;
+  	overflow-y: auto;
+}
+.canvas-preview .preview-box .preview{
+	width: 80px;
+	height: 80px;
+	margin: 8px 8px 0;
+	border: 2px solid #ddd;
+	float: left;
+	overflow: hidden;
+}
+.canvas-preview .preview-box .preview.sel{
+	border: 2px solid #3cccff;
+}
+.canvas-preview .preview-box .preview .slide{
+	width: 100%;
+	height: 100%;
+	position: relative;
+}
+.canvas-preview .preview-box .preview .slidenum{
+	width: 100px;
+	height: 100px;
+	line-height: 100px;
 }
 
+
+/* tool bar */
 .toolbar{
 	position: relative;
 	width: 80px;
@@ -264,8 +304,7 @@ body{
 .draw-box:hover .scaleControl, 
 .img-box:hover .deletePic,
 .draw-box:hover .deletePic,
-.img-box:hover .timelineControl,
-.draw-box:hover .timelineControl{
+.text-editor:hover .deletePic{
 
 	opacity:1.0;
 
@@ -313,7 +352,7 @@ body{
 
 
 .scaleControl{
-	background: url(../img/scale.png);
+	background: url(../img/scale-w.png);
 	width: 60px;
 	height: 60px;
 	position: absolute;
@@ -323,6 +362,9 @@ body{
 	opacity:0;
 
 }
+.draw-box .scaleControl{
+	background: url(../img/scale.png);
+}
 .deletePic{
 	z-index: 100;
 	position: absolute;
@@ -331,7 +373,7 @@ body{
 	width: 40px;
 	height: 40px;
 	overflow: hidden;
-	
+	font-size: 14px;
 	color: #fff;
 	opacity:0;
 }
@@ -361,11 +403,19 @@ body{
 	display: block;
 	padding-left: 5px;
 }
+
 .img-box .deletePic .text{
 	background: rgba(255,255,255,0);
 }
 .draw-box .deletePic .text{
 	background: rgba(255,255,255,0.8);
+}
+.text-editor .deletePic{
+	margin: 5px 0 0 0;
+}
+.text-editor .deletePic .text{
+	padding: 0 0 0 5px;
+	background: rgba(255,255,255,0);
 }
 .draw-box .deletePic .deleteBtn{
 	background: url(../img/close.png);
@@ -376,23 +426,28 @@ body{
 	display: block;
 	line-height: 30px;
 	margin: 0 10px 0 0;
+	font-size: 14px;
+	font-weight: normal;
+	color: #fff;
 }
 .deletePic .text a{
 	cursor: pointer;
 	color: #fff;
 	font-weight: bold;
 }
-.draw-box .deletePic .text a{
-	color: #bbb;
-}
 .deletePic .text a:hover{
 	color: #fff;
 	text-decoration: underline;
 }
-.draw-box .deletePic .text a:hover{
-	color: #aaa;
-	text-decoration: underline;
+
+.draw-box .deletePic .text a, .draw-box .deletePic .text span{
+	color: #bbb;
 }
+.draw-box .deletePic .text a:hover, .draw-box .deletePic .text span:hover{
+	color: #aaa;
+}
+
+
 
 #imgPreview{
 	z-index: 10000;
@@ -443,33 +498,29 @@ body{
 
 .text-editor{
 	position: absolute;
-	width: 540px;
+	width: 480px;
 	height: 135px;
 }
 .text-editor .textDone{
 	background: url(../img/done.png) no-repeat;
 }
-.text-editor .textDelete,
 .text-editor .textDone{
 	width: 70px;
 	height: 70px;
 	float: left;
 	cursor: pointer;
 }
-.text-editor .textDelete{
-	background: url(../img/delete.png) no-repeat;
-}
-.text-editor .textDone:hover,
-.text-editor .textDelete:hover{
+
+.text-editor .textDone:hover{
 	background-position: 0 -70px;
 }
-.text-editor input.text{
-	width: 430px;
+.text-editor input.inputtext{
+	width: 440px;
 }
-.text-editor p.text{
-	width: 430px;
+.text-editor p.inputtext{
+	width: 440px;
 }
-.text-editor .text{
+.text-editor .inputtext{
 	font-size: 30px;
 	line-height: 60px;
 	padding: 10px 20px 0;
@@ -478,7 +529,7 @@ body{
 	float: left;
 	font-weight: bold;
 }
-.text-editor .text:hover{
+.text-editor .inputtext:hover{
 	-moz-box-shadow: 0 0 5px #ccc;
 	-webkit-box-shadow: 0 0 5px #ccc;
 	box-shadow: 0 0 5px #ccc;
@@ -486,21 +537,22 @@ body{
 .text-editor .attr{
 	margin: 5px 0 0 0;
 	float: left;
-	width: 540px;
+	width: 480px;
 }
 .text-editor .block{
-	width: 60px;
-	height: 60px;
+	width: 50px;
+	height: 50px;
 	font-size: 20px;
-	line-height: 60px;
+	line-height: 50px;
 	text-align: center;
 	font-weight: bold;
+	border: 1px solid #000;
 }
 
 .text-editor .block.background{
 	float: left;
 	overflow: hidden;
-	width: 60px;
+	width: 50px;
 	background: #fff;
 	transition:all 0.5s;
 	-moz-transition:all 0.5s; /* Firefox 4 */
@@ -508,12 +560,12 @@ body{
 	-o-transition:all 0.5s; /* Opera */
 }
 .text-editor .block.background:hover{
-	width: 300px;
+	width: 260px;
 }
 .text-editor .block.background .block{
 	float: right;
 	cursor: pointer;
-	opacity: 0.5;
+	opacity: 1;
 }
 .text-editor .block.background .block:hover, .text-editor .block.background .block.sel{
 	opacity: 1;
@@ -552,7 +604,7 @@ body{
 .text-editor .block.fontcolor{
 	float: right;
 	overflow: hidden;
-	width: 60px;
+	width: 50px;
 	background: #fff;
 	transition:all 0.5s;
 	-moz-transition:all 0.5s; /* Firefox 4 */
@@ -560,12 +612,12 @@ body{
 	-o-transition:all 0.5s; /* Opera */
 }
 .text-editor .block.fontcolor:hover{
-	width: 300px;
+	width: 260px;
 }
 .text-editor .block.fontcolor .block{
 	float: left;
 	cursor: pointer;
-	opacity: 0.5;
+	opacity: 1;
 }
 .text-editor .block.fontcolor .block:hover, .text-editor .block.fontcolor .block.sel{
 	opacity: 1;
@@ -930,3 +982,20 @@ body{
 	color: #ddd;
 	font-size: 18px;
 }
+
+.popupinfo{
+	background: #ccf4ff;
+	height: 30px;
+	width: 480px;
+	position: absolute;
+	top: 0;
+	left: 50%;
+	margin-left: -240px;
+	text-align: center;
+	line-height: 30px;
+	color: #999;
+	z-index: 1000;
+	display: none;
+}
+
+
