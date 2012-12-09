@@ -2,46 +2,47 @@
 //  preview.js
 //  preview for each slides
 //
-//  slideNum: slides number
-//
+//  stage.slides.length: slides number
+//	stage.currentSlide
 	
 
 	function updatePreview(){
 
 		$(".preview-box").html("");
 
-		for(var i = 0; i<=slideNum; i++){
+		for(var i = 0; i<stage.slides.length; i++){
 			var $box = $("<li class='preview' id='preview"+i+"'></li>");
 			var $dropzone = $(".slides #dropzone"+i).clone();
 			$dropzone.css("zoom",1/6.0);
 
-
-			if(i == index)
+			if(i == stage.currentSlide)
 				$box.addClass("sel");
 
 			$box.append($dropzone);
 			$(".preview-box").append($box);
 
-
 			var $canvasold = $(".slides #dropzone"+i).find(".draw-box div canvas");
-			var $canvasnew = $(".preview #dropzone"+i).find(".draw-box div canvas");
+			var $canvasnew = $dropzone.find(".draw-box div canvas");
 
-
-			for (var j = 0; j<$canvasnew.length; j++){ 
+			for (var j = 0; j < $canvasnew.length; j++){ 
 				$canvasold[j] = $(".slides #dropzone"+i).find(".draw-box div canvas");
 
-				console.log($canvasnew[j]);
-				$canvasnew[j].width = $canvasold[j][0].width;
-				$canvasnew[j].height = $canvasold[j][0].height;
-
-				console.log($canvasold[j][0]);
 				var c = $canvasnew[j].getContext('2d');
-				c = cloneCanvas($canvasold[j][0], c);
+				c = cloneCanvas($canvasold[0][j], c);
 				//$dropzone.find(".draw-box canvas")[j].replaceWith($canvasnew[j]);
 			}
+
+			var $block = $("<div class='blockPreview' index='"+i+"'></div>");
+			$dropzone.append($block);
 		}
-		
+
+			
 	}
+
+	$(".blockPreview").live("click", function(){ 
+		var n =	parseInt($(this).attr("index"));
+		stage.to(n);
+	});
 
 	function cloneCanvas(oldCanvas,context) {
 

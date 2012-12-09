@@ -52,6 +52,8 @@ var shapeNum = [];
 
 // append it inside each object
 var functionDiv = "<div class='scaleControl'></div>\
+					<div class='rotateControl'></div>\
+					<div class='moveControl'></div>\
 					<div class='deletePic'>\
 						<div class='deleteBtn'></div>\
 						<div class='text'>\
@@ -64,11 +66,13 @@ var functionDiv = "<div class='scaleControl'></div>\
 
 $('.toolbar ul li.tool').click(function(e){
 	if($(this).hasClass("active")){
-		
+		$('.toolbar ul li').removeClass("active");
 		stage.getCurrent().exitDrawMode();
 
 	}
 	else{
+		$('.toolbar ul li').removeClass("active");
+		$(this).addClass("active");
 		stage.getCurrent().enterDrawMode();
 
 		if ($(this).hasClass("addRect"))
@@ -107,7 +111,10 @@ Stage.prototype.createSlide = function(){
 	}
 
 	this.getCurrent().exitDrawMode();
-	this.next();
+
+	this.to(this.slides.length-1);
+	updatePreview(); // update preview
+
 }
 
 Stage.prototype.next = function(){
@@ -151,6 +158,8 @@ Stage.prototype.to = function(idx){
 	present.$el.addClass('present').css('z-index', 100);
 
 	this.currentSlide = idx;
+	updatePreview(); // update preview
+
 }
 
 Stage.prototype.getCurrent = function(){
@@ -242,8 +251,8 @@ Slide.prototype.bindEvents = function(){
 				data = JSON.parse(data);
 			}
 			var $box = createImageBox(data.src, x, y)
-			stage.getCurrent().$el.append($box);
-
+			//stage.getCurrent().$el.append($box);
+			$box.insertBefore(stage.getCurrent().$el.find("canvas.drawCanvas"));
 		}
 		else{  //drop img from desktop
 
@@ -251,11 +260,13 @@ Slide.prototype.bindEvents = function(){
 			reader.onload = function(evt) {
 				
 				var $box = createImageBox(evt.target.result, x, y);
-				stage.getCurrent().$el.append($box);
-
+				//stage.getCurrent().$el.append($box);
+				$box.insertBefore(stage.getCurrent().$el.find("canvas.drawCanvas"));
 			};
 			reader.readAsDataURL(e.dataTransfer.files[0]);
 		}
+
+		updatePreview(); // update preview
 	})
 
 	$el.dblclick(function(e){
@@ -266,14 +277,16 @@ Slide.prototype.bindEvents = function(){
 		var y = e.pageY - parentOffset.top;
 
 		var $box = createTextBox(x,y);
-		stage.getCurrent().$el.append($box);
+		$box.insertBefore(stage.getCurrent().$el.find("canvas.drawCanvas"));
 
-		$box.find('.text').focus();
+		$box.find('.inputtext').focus();
+		updatePreview();
 	});
 }
 
 Slide.prototype.enterDrawMode = function(){
 	$(this.canvas).show();
+	this.processingInstance.background(255,255,255,0);
 }
 
 Slide.prototype.exitDrawMode = function(){
@@ -382,12 +395,17 @@ function drawObj(processing){
 		// popup a draw object
 		if(shapes.width!=0){
 			var $html = createDrawObject(shapeNum[stage.currentSlide],shapes);
-			stage.getCurrent().$el.append($html);
+			//stage.getCurrent().$el.append($html);
+			$html.insertBefore(stage.getCurrent().$el.find("canvas.drawCanvas"));
 		}
 		else{
 
 		}
 
+		$('.toolbar ul li').removeClass("active");
+		stage.getCurrent().exitDrawMode();
+
+		updatePreview();
 		shapeNum[stage.currentSlide] ++;
 	}
 
@@ -406,7 +424,11 @@ var createImageBox = (function(){
 			// image resizable
 			$(img).attr('width', img.width+'px');
 			$(img).attr('height', img.height+'px');
-			$(img).resizable(); 
+			$(img).resizable({
+				stop: function() {
+	                updatePreview();
+	            }
+			}); 
 
 			// image located according current cursor position
 			// cursor position is the center of a image
@@ -414,11 +436,12 @@ var createImageBox = (function(){
 				left : (x-img.width/2) + 'px',
 				top : (y-img.height/2) + 'px'
 			})
+
 		}
 		img.src= src;
 
 		// imageBox templates
-		var $box = $("<div id='imgBox"+imageId+"' style='position:absolute;' class='img-box'></div>");
+		var $box = $("<div id='imgBox"+imageId+"' style='position:absolute;' class='img-box setcenter'></div>");
 		$box.append(img);
 		$box.append(functionDiv);
 
@@ -428,6 +451,9 @@ var createImageBox = (function(){
 		$box.draggable({
             start: function() {
                 
+            },
+            stop: function() {
+                updatePreview();
             }
         });
 
@@ -447,16 +473,26 @@ var createTextBox = (function(){
 	var color4 = (195,195,195);
 	var color5 = (0,0,0);
 
-	var textcolor = "rgb(60,204,255)";
+	var textcolor = "rgb(255,255,255)";
 	var textbgcolor = new Array();
-	textbgcolor[0] = 255;
-	textbgcolor[1] = 255;
-	textbgcolor[2] = 255;
+	textbgcolor[0] = 0;
+	textbgcolor[1] = 0;
+	textbgcolor[2] = 0;
 	var textsize = 30;
-	var textbgalpha = 60;
+	var textbgalpha = 50;
 
 	textbgA = generateRGBA(textbgcolor, textbgalpha);
 	textbg = generateRGB(textbgcolor);
+
+	var deleteBox = "<div class='deletePic'>\
+						<div class='deleteBtn'></div>\
+						<div class='text'>\
+							<span>Really?</span>\
+							<a click='' class='do_click'>Yes</a>\
+							<span>/</span>\
+							<a click='' class='cancel_click'>No</a>\
+						</div>\
+					</div>";
 
 	return function(x,y){
 
@@ -473,33 +509,33 @@ var createTextBox = (function(){
 			y = window.innerHeight - tempHeight;
 
 		// html template for text box
-		var $box = $("<div class='text-editor' style='left:"+x+"px;top:"+y+"px;position:absolute' id='text-editor"+textId+"'>");
+		var $box = $("<div class='text-editor' style='left:"+0+"px;top:"+y+"px;position:absolute' id='text-editor"+textId+"'>");
 
 		$box.append("<div class='textArea'>\
-				<input type='text' class='text' style='color:"+textcolor+"; background:"+textbgA+";font-size:"+textsize+"' value=''>\
-				<div class='textDone'></div>\
-				<div class='textDelete' style='display:none'></div>\
-			</div>\
-  			<div class='attr'>\
-    			<div class='block background'>\
-    				<div class='bgcolor block' style='background:"+textbgA+"'></div>\
-    				<div class='color1 block' val='1'></div>\
-      				<div class='color2 block' val='2'></div>\
-     				<div class='color3 block' val='3'></div>\
-      				<div class='color4 block' val='4'></div>\
-      				<div class='color5 block' val='5'></div>\
-    			</div>\
-    			<div class='block bg-alpha' style='color:"+textbg+";background:"+textbgA+"'><p class='TKAdjustableNumber ' data-var='bgalpha' data-min='0' data-max='100'>%</p></div>\
-    			<div class='block fontsize' style='color:"+textcolor+";background:"+textbgA+"'><p class='TKAdjustableNumber ' data-var='fontsize' data-min='10' data-max='60'></p></div>\
-    			<div class='block fontcolor'>\
-    				<div class='fontcolor block' style='background:"+textcolor+"'></div>\
-    				<div class='color1 block' val='1'></div>\
-      				<div class='color2 block' val='2'></div>\
-     				<div class='color3 block' val='3'></div>\
-      				<div class='color4 block' val='4'></div>\
-      				<div class='color5 block' val='5'></div>\
-    			</div>\
- 			</div></div>");
+						<input type='text' class='inputtext' style='color:"+textcolor+"; background:"+textbgA+";font-size:"+textsize+"' value=''>\
+						"+deleteBox+"\
+					</div>\
+	      			<div class='attr'>\
+	        			<div class='block background' title='background-color'>\
+	        				<div class='bgcolor block' style='background:"+textbgA+"'></div>\
+	        				<div class='color1 block' val='1'></div>\
+	          				<div class='color2 block' val='2'></div>\
+	         				<div class='color3 block' val='3'></div>\
+	          				<div class='color4 block' val='4'></div>\
+	          				<div class='color5 block' val='5'></div>\
+	        			</div>\
+	        			<div class='block bg-alpha' title='background-alpha' style='color:"+textbg+";background:"+textbgA+"'><p class='TKAdjustableNumber ' data-var='bgalpha' data-min='0' data-max='100'>%</p></div>\
+	        			<div class='block fontsize' title='font-size' style='color:"+textcolor+";background:"+textbgA+"'><p class='TKAdjustableNumber ' data-var='fontsize' data-min='10' data-max='60'></p></div>\
+	        			<div class='block fontcolor' title='font-color'>\
+	        				<div class='fontcolor block' style='background:"+textcolor+"'></div>\
+	        				<div class='color1 block' val='1'></div>\
+	          				<div class='color2 block' val='2'></div>\
+	         				<div class='color3 block' val='3'></div>\
+	          				<div class='color4 block' val='4'></div>\
+	          				<div class='color5 block' val='5'></div>\
+	        			</div>\
+	     			</div>\
+	     		</div>");
 
 		/**
 		 * make text box dragable
@@ -507,75 +543,49 @@ var createTextBox = (function(){
 		$box.draggable({
             start: function() {
 
+            },
+            stop: function() {
+                updatePreview();
             }
         });
 
 		/**
-		 * hover on box to show buttons
-		 */
-		$box.hover(
-			function(){
-				if(!isEditMode){
-					setNotEditMode();
-				}
-			},
-			function(){
-				setEditMode();
-			}
-		);
-		
-		/**
-		 * delete a text box
-		 */
-		$box.find('.textDelete').click(function(e){
-			$box.remove();
-		});
-
-		/**
-		 * click ok button equals to the focus of textinput blured
-		 */
-		$box.find('.textDone').click(function(e){
-			$box.find('input.text').blur();
-		});
-
-		/**
 		 * press key enter equals to the focus of textinput blured 
 		 */ 
-		$box.find('input.text').bind('keyup',function(event) {  
+		$box.find('input.inputtext').bind('keyup',function(event) {  
       		if(event.keyCode==13){  
-            	$box.find('input.text').blur();
+            	$box.find('input.inputtext').blur();
     		}  
      	}); 
 
 		/**
 		 * the focus of textinput blur, replace the input element with p element
 		 */ 
-		$box.find('input.text').blur(blur)
+		$box.find('input.inputtext').blur(blur);
+
 		function blur(e){
-			isEditMode = false;
+
 			if($(this).val() == ""){
 				$(this).parent().parent().remove();
 			}
 			else{
 				$box.find('.attr').fadeOut(150);
 				//$box.css("height",70);
-				$box.find('.textDone').fadeOut(150);
+				
 				e.stopPropagation();
 
 				var text = $(this).val();
-				var $p = $("<p class='text' >"+text+"</p>");
+				var $p = $("<p class='inputtext' >"+text+"</p>");
 				$(this).replaceWith($p);
 				resetStyle();
 				// click to show the input element
 				// enter edit mode
 				$p.dblclick(function(e){
 					e.stopPropagation();
-					isEditMode = true;
-					setEditMode();
 
-					var $input = $("<input type='text' class='text' />");
+
+					var $input = $("<input type='text' class='inputtext' />");
 					$box.find('.attr').fadeIn(150);
-					$box.find('.textDone').fadeIn(150);
 					$box.css("height",135);
 					// use the text in the closure
 					$input.val(text);
@@ -587,11 +597,12 @@ var createTextBox = (function(){
 
 					$input.bind('keyup',function(event) {  
 		          		if(event.keyCode==13){  
-		                	$box.find('input.text').blur();
+		                	$box.find('input.inputtext').blur();
 		        		}  
 		         	}); 
 				})
 			}
+			updatePreview(); 
 		}
 
 		/**
@@ -639,7 +650,7 @@ var createTextBox = (function(){
                 	textbgalpha = this.bgalpha;
                 	resetStyle();
 
-                    $box.find('.text').css({
+                    $box.find('.inputtext').css({
                     		"font-size": this.fontsize,
                     		"background": "rgba("+textbgcolor[0]+","+textbgcolor[1]+","+textbgcolor[2]+","+this.bgalpha/100.0+")"
                     });
@@ -660,36 +671,25 @@ var createTextBox = (function(){
         	textbg = generateRGB(textbgcolor);
         	textbgA = generateRGBA(textbgcolor,textbgalpha);
 
-        	$box.find('.text').css("color",textcolor);
+        	$box.find('.inputtext').css("color",textcolor);
 			$box.find('.block.fontsize').css("color",textcolor);
 			$box.find('.block.fontcolor .block.fontcolor').css("background",textcolor);
 			
-			$box.find('.text').css("font-size",textsize);
+			$box.find('.inputtext').css("font-size",textsize);
 
-			$box.find('.text').css("background",textbgA);
+			$box.find('.inputtext').css("background",textbgA);
 			$box.find('.block .bgcolor.block').css("background",textbg);
 			$box.find('.block.bg-alpha').css("background",textbgA);
-			$box.find('.block.bg-alpha p').css("color",textbg);
-			$box.find('.block.bg-alpha p span').css("color",textbg);
+			$box.find('.block.bg-alpha p').css("color",textcolor);
+			$box.find('.block.bg-alpha p span').css("color",textcolor);
 			$box.find('.block.fontsize').css("background",textbgA);
 
+			updatePreview();
         }
 
-        /**
-		 * enter edit mode
-		 */
-        function setEditMode(){
-			$box.find('.textDelete').css('display','none').fadeOut(150);
-		}
-		/**
-		 * exit edit mode
-		 */
-		function setNotEditMode(){
-			$box.find('.textDelete').fadeIn(150);
-		}
 
 		textId++;
-		isEditMode = true;
+
 		return $box;
 	}
 
@@ -746,7 +746,7 @@ var createDrawObject = (function(){
 					$(tempcanvas).css("width",w+lineWidth).css("height",h+lineWidth);
 			}
 
-				$(tempcanvas).resizable();
+				
 
 			setProcessingStyle(processing);
 
@@ -772,17 +772,25 @@ var createDrawObject = (function(){
 
 		$box.append(tempcanvas);
 		$box.append(functionDiv);
-		
+		$(tempcanvas).resizable({
+			stop: function() {
+                updatePreview();
+            }
+		});
+
 		/**
 		 * drag an image
 		 */
 		$box.draggable({
             start: function() {
                 
+            },
+            stop: function() {
+                updatePreview();
             }
         });
 
-        
+       
 
         return $box;
 	}
@@ -951,4 +959,55 @@ $('.do_click').live("click", function(){
 		$(this).parent().parent().remove(); 
 	else
 		$(this).parent().parent().parent().remove(); 
+	updatePreview();
 });	
+/**
+ * rotate an object
+ */
+var isRotate = false;
+$(".rotateControl").live("mousedown", function(e){
+	isRotate = true;
+	e.stopPropagation();
+	e.preventDefault();
+
+	$(this).parent().draggable("destroy");
+
+	var parentOffset = $(this).parent().offset(); 
+	var centerX = parentOffset.left + parseInt($(this).parent().css("width")) /2 ;
+	var centerY = parentOffset.top + parseInt($(this).parent().css("height")) /2 ;
+	var startX = e.pageX;
+	var startY = e.pageY;
+
+	var angle1 = Math.atan2(startX - centerX, startY - centerY);
+
+
+	$(this).live("mousemove", function(e){
+		if(isRotate){
+			e.stopPropagation();
+			e.preventDefault();
+			//$(this).parent().draggable({ disabled: true });
+			var endX = e.pageX;
+			var endY = e.pageY;
+
+			var vector1 = [(centerX - startX), (centerY - startY)] ;
+			var vector2 = [(centerX - endX), (centerY - endY)] ;
+			
+			var angle2 = Math.atan2(endX - centerX, endY - centerY);
+			degree = (angle1 - angle2) * (180/Math.PI);
+
+			$(this).parent().css("transform", "rotate("+degree+"deg)")
+							.css("-ms-transform", "rotate("+degree+"deg)")
+							.css("-webkit-transform", "rotate("+degree+"deg)")
+							.css("-moz-transform", "rotate("+degree+"deg)")
+							.css("-o-transform", "rotate("+degree+"deg)");
+		}
+	});
+	
+	$(this).live("mouseup", function(e){
+		isRotate = false; 
+		
+		$(this).parent().unbind("mousemove");
+		$(this).parent().draggable();
+		updatePreview();
+	});
+});
