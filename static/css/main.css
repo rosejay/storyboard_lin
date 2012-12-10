@@ -89,6 +89,7 @@ body{
 .right-panel{
 	position: relative;
 	height: 100%;
+	overflow: hidden;
 }
 /* preview */
 .canvas-preview{
@@ -208,6 +209,13 @@ body{
 .toolbar .toolbar-inner li.addEllipse{
 	background: url(../img/eclipse.png) no-repeat;
 }
+.toolbar .toolbar-inner li.bigger{
+	background: url(../img/big.png) no-repeat;
+}
+.toolbar .toolbar-inner li.smaller{
+	background: url(../img/small.png) no-repeat;
+}
+
 .toolbar .toolbar-inner li.play{
 	border-top: 1px solid #f2f2f2;
 	position: absolute;
@@ -871,6 +879,7 @@ body{
 
 
 
+
 #slide{
 	z-index:0;
 	width: 100%;
@@ -1042,3 +1051,42 @@ body{
 	width: 100%;
 	height: 100%;
 }
+
+.main{
+	width: 800px;
+	position: relative;
+	height: 100%;
+	margin: 100px auto;
+}
+.main h3{
+	font-size: 40px;
+	font-weight: bold;
+	color: #CCC;
+	text-align: center;
+	
+}
+.main .model{
+	margin: 0 95px;
+}
+.main .tree, .main .linear{
+	float: left;
+	width: 255px;
+	height: 255px;
+	margin:20px;
+	cursor: pointer;
+}
+.main .tree{
+	background: url("../img/tree.png");
+	border: 5px solid #ddd;
+}
+.main .tree:hover{
+	border: 5px solid #3cccff;
+}
+.main .linear{
+	background: url("../img/linear.png");
+	border: 5px solid #ddd;
+}
+.main .linear:hover{
+	border: 5px solid #3cccff;
+}
+
