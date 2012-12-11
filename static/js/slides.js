@@ -264,6 +264,7 @@ Slide.prototype.bindEvents = function(){
 				$box.insertBefore(stage.getCurrent().$el.find("canvas.drawCanvas"));
 			};
 			reader.readAsDataURL(e.dataTransfer.files[0]);
+			uploadImageServer(e.dataTransfer.files[0]);
 		}
 
 		updatePreview(); // update preview
@@ -307,7 +308,67 @@ Slide.tpl = '<div id="dropzone{{guid}}" class="wboard step slide rebuild" >\
 				<span class="slidenum">{{guid}}</span>\
 				<canvas resize class="drawCanvas" style="display:none"></canvas>\
 			</div>';
-	
+
+function uploadImageServer(file){
+	var xhr = new XMLHttpRequest();
+	var url = 'http://localhost:8888/user/upload';
+	var boundary = '-----------------------' + new Date().getTime();
+	var fileName = file.name;
+
+	xhr.open("post", url, true);
+	xhr.setRequestHeader('Content-Type', 'multipart/form-data; boundary=' + boundary);
+
+	if (window.FormData) {
+		　//Chrome12+
+		　var formData = new FormData();
+		　formData.append('file', file);
+		　//formData.append('hostid', userId);
+		　//formData.append('requestToken', t);
+
+		　data = formData;
+	} else if (file.getAsBinary) {
+		　//FireFox 3.6+
+		　data = "--" +
+		　boundary +
+		　crlf +
+		　"Content-Disposition: form-data; " +
+		　"name=\"" +
+		　'file' +
+		　"\"; " +
+		　"filename=\"" +
+		　unescape(encodeURIComponent(file.name)) +
+		　"\"" +
+		　crlf +
+		　"Content-Type: image/jpeg" +
+		　crlf +
+		　crlf +
+		　file.getAsBinary() +
+		　crlf +
+		　"--" +
+		　boundary +
+		　crlf +
+		　"Content-Disposition: form-data; " +
+		　"name=\"hostid\"" +
+		　crlf +
+		　crlf +
+		　userId +
+		　crlf +
+		　"--" +
+		　boundary +
+		　crlf +
+		　"Content-Disposition: form-data; " +
+		　"name=\"requestToken\"" +
+		　crlf +
+		　crlf +
+		　t +
+		　crlf +
+		　"--" +
+		　boundary +
+		　'--';
+	}
+
+	xhr.send(data);
+}
 //===========================================
 // pending(has not been rewrite yet)
 //========================================
