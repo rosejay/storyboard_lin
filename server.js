@@ -16,11 +16,16 @@ app.get('/get/files', function(req, res){
 	})
 })
 
-app.get('/user/upload', function(req, res){
+
+
+app.post('/user/upload', function(req, res){
+	//app.redirect("/");
+	console.log(req);
+	
 	fs.readFile(req.files.displayImage.path, function (err, data) {
 		var newPath = __dirname+'/static/materials/user';
 		fs.writeFile(newPath, data, function (err) {
-			res.redirect("back");
+			app.redirect("/");
 		});
 	});
 })

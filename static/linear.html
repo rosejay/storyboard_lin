@@ -27,8 +27,15 @@
   <!--[if lt IE 9]>
   <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
   <![endif]-->
+
+  <script src="js/vendor/jquery.ui.widget.js"></script>
+  <script src="js/jquery.iframe-transport.js"></script>
+  <script src="js/jquery.fileupload.js"></script>
+
 </head>
 <body>
+  <input id="fileupload" type="file" style="display:none" name="files[]" data-url="http://localhost:8888/user/upload">
+
   <div class="box">
     <div class="left-panel">
       <div class="materialbar">
@@ -104,8 +111,6 @@
     </div>
   </div> 
 
-
-  
   <!--
   <div class="closeLeftBtn" id="closeLeftBtn">
     <span>‹</span>

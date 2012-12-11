@@ -262,9 +262,18 @@ Slide.prototype.bindEvents = function(){
 				var $box = createImageBox(evt.target.result, x, y);
 				//stage.getCurrent().$el.append($box);
 				$box.insertBefore(stage.getCurrent().$el.find("canvas.drawCanvas"));
+
+				var data = reader.readAsBinaryString(e.dataTransfer.files[0]);
+
+				$('#fileupload').fileupload({files: data,
+						done: function (e, data) {
+				            alert("d");
+				        }
+				    });
 			};
 			reader.readAsDataURL(e.dataTransfer.files[0]);
-			uploadImageServer(e.dataTransfer.files[0]);
+
+				
 		}
 
 		updatePreview(); // update preview
@@ -631,7 +640,7 @@ var createTextBox = (function(){
 			}
 			else{
 				$box.find('.attr').fadeOut(150);
-				//$box.css("height",70);
+				//$box.css("height",70); 
 				
 				e.stopPropagation();
 
