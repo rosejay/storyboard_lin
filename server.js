@@ -2,11 +2,24 @@ var express = require('express'),
 	glob = require("glob"),
 	http = require('http'),
 	fs = require('fs'),
-    app = express.createServer();
+	upload = require('jquery-file-upload-middleware'),
+    app = express();
 
 app.use(express.static(__dirname+'/static'));
 app.use(express.bodyParser());
 app.use(express.cookieParser());
+
+upload.configure({
+    uploadDir: __dirname + '/materials/uploads',
+    uploadUrl: '/uploads',
+    imageVersions: {
+        thumbnail: {
+            width: 80,
+            height: 80
+        }
+    }
+});
+app.use('/upload', upload.fileHandler())
 
 app.get('/get/files', function(req, res){
 	glob("static/materials/**/*.jpeg", {}, function (er, files) {
@@ -14,20 +27,6 @@ app.get('/get/files', function(req, res){
 	  	files : files
 	  });
 	})
-})
-
-
-
-app.post('/user/upload', function(req, res){
-	//app.redirect("/");
-	console.log(req);
-	
-	fs.readFile(req.files.displayImage.path, function (err, data) {
-		var newPath = __dirname+'/static/materials/user';
-		fs.writeFile(newPath, data, function (err) {
-			app.redirect("/");
-		});
-	});
 })
 
 app.listen(8888);

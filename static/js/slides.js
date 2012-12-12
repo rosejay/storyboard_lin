@@ -42,6 +42,13 @@ function initialize(){
 		stage.createSlide();
 	});
 
+	$("#fileupload").fileupload({
+        dataType: 'json',
+		done : function(e, data){
+			alert("okk")
+		}
+	})
+
 }
 
 var currentType = "";   // "rect" "arrow" "ellipse" "dash" "brush"
@@ -256,22 +263,21 @@ Slide.prototype.bindEvents = function(){
 		}
 		else{  //drop img from desktop
 
-			var reader = new FileReader();
+			var reader = new FileReader(),
+				binaryReader = new FileReader();
 			reader.onload = function(evt) {
 				
 				var $box = createImageBox(evt.target.result, x, y);
 				//stage.getCurrent().$el.append($box);
 				$box.insertBefore(stage.getCurrent().$el.find("canvas.drawCanvas"));
-
-				var data = reader.readAsBinaryString(e.dataTransfer.files[0]);
-
-				$('#fileupload').fileupload({files: data,
-						done: function (e, data) {
-				            alert("d");
-				        }
-				    });
 			};
-			reader.readAsDataURL(e.dataTransfer.files[0]);
+			binaryReader.onload = function(evt){
+				$('#fileupload').fileupload("add", {files : [evt.target.result]});
+			}
+			Array.prototype.forEach.call(e.dataTransfer.files, function(file){
+				reader.readAsDataURL(file);
+				binaryReader.readAsBinaryString(file);
+			})
 
 				
 		}
@@ -318,66 +324,6 @@ Slide.tpl = '<div id="dropzone{{guid}}" class="wboard step slide rebuild" >\
 				<canvas resize class="drawCanvas" style="display:none"></canvas>\
 			</div>';
 
-function uploadImageServer(file){
-	var xhr = new XMLHttpRequest();
-	var url = 'http://localhost:8888/user/upload';
-	var boundary = '-----------------------' + new Date().getTime();
-	var fileName = file.name;
-
-	xhr.open("post", url, true);
-	xhr.setRequestHeader('Content-Type', 'multipart/form-data; boundary=' + boundary);
-
-	if (window.FormData) {
-		　//Chrome12+
-		　var formData = new FormData();
-		　formData.append('file', file);
-		　//formData.append('hostid', userId);
-		　//formData.append('requestToken', t);
-
-		　data = formData;
-	} else if (file.getAsBinary) {
-		　//FireFox 3.6+
-		　data = "--" +
-		　boundary +
-		　crlf +
-		　"Content-Disposition: form-data; " +
-		　"name=\"" +
-		　'file' +
-		　"\"; " +
-		　"filename=\"" +
-		　unescape(encodeURIComponent(file.name)) +
-		　"\"" +
-		　crlf +
-		　"Content-Type: image/jpeg" +
-		　crlf +
-		　crlf +
-		　file.getAsBinary() +
-		　crlf +
-		　"--" +
-		　boundary +
-		　crlf +
-		　"Content-Disposition: form-data; " +
-		　"name=\"hostid\"" +
-		　crlf +
-		　crlf +
-		　userId +
-		　crlf +
-		　"--" +
-		　boundary +
-		　crlf +
-		　"Content-Disposition: form-data; " +
-		　"name=\"requestToken\"" +
-		　crlf +
-		　crlf +
-		　t +
-		　crlf +
-		　"--" +
-		　boundary +
-		　'--';
-	}
-
-	xhr.send(data);
-}
 //===========================================
 // pending(has not been rewrite yet)
 //========================================
